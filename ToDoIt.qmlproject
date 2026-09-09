@@ -1,0 +1,24 @@
+import QmlProject
+
+Project {
+    mainFile: "src/presentation/qml/Main.qml"
+    qt6Project: true
+
+    QmlFiles {
+        directory: "src/presentation/qml"
+    }
+
+    ImageFiles {
+        directory: "assets"
+    }
+
+    Files {
+        filter: "*.json"
+        directory: "config"
+    }
+
+    // The source path supports pure visual editing. The generated path lets
+    // Design Studio resolve compiled module metadata after local-dev configure.
+    importPaths: ["src/presentation/qml", "build/local-dev/src"]
+    targetDirectory: "/qt/qml/ToDoIt"
+}

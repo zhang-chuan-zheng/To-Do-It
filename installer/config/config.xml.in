@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>To Do It</Name>
+    <Version>@TODOIT_VERSION@</Version>
+    <Title>To Do It 安装与维护</Title>
+    <Publisher>To Do It</Publisher>
+    <StartMenuDir>To Do It</StartMenuDir>
+    <TargetDir>@HomeDir@/AppData/Local/Programs/ToDoIt</TargetDir>
+    <MaintenanceToolName>ToDoItMaintenanceTool</MaintenanceToolName>
+    <MaintenanceToolIniFile>ToDoItMaintenanceTool.ini</MaintenanceToolIniFile>
+    <RemoveTargetDir>false</RemoveTargetDir>
+    <AllowNonAsciiCharacters>true</AllowNonAsciiCharacters>
+    <AllowSpaceInPath>true</AllowSpaceInPath>
+    <RepositorySettingsPageVisible>false</RepositorySettingsPageVisible>
+    <SaveDefaultRepositories>true</SaveDefaultRepositories>
+    <AllowRepositoriesForOfflineInstaller>true</AllowRepositoriesForOfflineInstaller>
+@TODOIT_REMOTE_REPOSITORIES@
+    <WizardDefaultWidth>760</WizardDefaultWidth>
+    <WizardDefaultHeight>540</WizardDefaultHeight>
+    <RunProgram>@TargetDir@/ToDoIt.exe</RunProgram>
+    <RunProgramDescription>启动 To Do It</RunProgramDescription>
+    <ControlScript>installer-controller.qs</ControlScript>
+</Installer>

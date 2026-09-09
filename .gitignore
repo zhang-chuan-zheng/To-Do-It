@@ -1,0 +1,32 @@
+# CMake and IDE generated files
+/build/
+/out/
+/cmake-build-*/
+/.toolchains/
+/.vs/
+CMakeCache.txt
+CMakeFiles/
+compile_commands.json
+CMakeUserPresets.json
+src/.qmlls.ini
+*.user
+*.user.*
+
+# Compiler outputs
+*.exe
+*.dll
+*.lib
+*.exp
+*.pdb
+*.ilk
+*.obj
+*.o
+*.a
+*.log
+
+# Runtime data and temporary files
+/runtime/
+/event.csv
+/data/event.csv
+*.tmp
+*.bak

@@ -1,0 +1,81 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "To Do It: Configure (MSVC Debug)",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/configure.ps1"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "To Do It: Build (MSVC Debug)",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/build.ps1"
+      ],
+      "dependsOn": "To Do It: Configure (MSVC Debug)",
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "To Do It: Test (MSVC Debug)",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/test.ps1"
+      ],
+      "dependsOn": "To Do It: Build (MSVC Debug)",
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "To Do It: QML Lint (MSVC Debug)",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/build.ps1",
+        "-Target",
+        "all_qmllint"
+      ],
+      "dependsOn": "To Do It: Configure (MSVC Debug)",
+      "problemMatcher": []
+    },
+    {
+      "label": "To Do It: Run (MSVC Debug)",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/run.ps1"
+      ],
+      "dependsOn": "To Do It: Build (MSVC Debug)",
+      "problemMatcher": []
+    }
+  ]
+}

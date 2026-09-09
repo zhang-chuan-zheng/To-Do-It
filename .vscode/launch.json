@@ -1,0 +1,34 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "To Do It: Debug (MSVC)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/local-dev/bin/ToDoIt.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "D:\\Qt\\6.11.2\\msvc2022_64\\bin;${env:PATH}"
+        },
+        {
+          "name": "TODOIT_EVENT_FILE",
+          "value": "${workspaceFolder}\\data\\event.csv"
+        },
+        {
+          "name": "QT_FORCE_STDERR_LOGGING",
+          "value": "1"
+        }
+      ],
+      "console": "integratedTerminal",
+      "logging": {
+        "moduleLoad": false,
+        "programOutput": true
+      },
+      "preLaunchTask": "To Do It: Build (MSVC Debug)"
+    }
+  ]
+}

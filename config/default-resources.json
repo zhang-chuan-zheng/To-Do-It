@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "logos": {
+    "defaultRoot": "assets/logos/default",
+    "customRoot": "data/customization/logos",
+    "files": {
+      "app": "app.svg"
+    }
+  },
+  "icons": {
+    "defaultRoot": "assets/icons/default",
+    "customRoot": "data/customization/icons",
+    "files": {
+      "search": "search.svg",
+      "minimize": "minimize.svg",
+      "maximize": "maximize.svg",
+      "restore": "restore.svg",
+      "close": "close.svg",
+      "chevronDown": "chevron-down.svg",
+      "calendar": "calendar.svg",
+      "sortUp": "sort-up.svg",
+      "sortDown": "sort-down.svg",
+      "add": "add.svg",
+      "attachmentAdd": "attachment-add.svg",
+      "palette": "palette.svg"
+    }
+  },
+  "backgrounds": {
+    "defaultRoot": "assets/themes/backgrounds",
+    "customRoot": "data/customization/backgrounds"
+  }
+}

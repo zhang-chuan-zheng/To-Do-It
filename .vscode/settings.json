@@ -1,0 +1,10 @@
+{
+  "cmake.useCMakePresets": "always",
+  "cmake.configureOnOpen": false,
+  "cmake.cmakePath": "D:/Qt/Tools/CMake_64/bin/cmake.exe",
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  "files.associations": {
+    "*.qml": "qml"
+  },
+  "cmake.useVsDeveloperEnvironment": "always"
+}

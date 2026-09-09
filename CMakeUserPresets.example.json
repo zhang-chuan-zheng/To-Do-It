@@ -1,0 +1,82 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "local-msvc-toolchain",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_PREFIX_PATH": {
+          "type": "PATH",
+          "value": "D:/Qt/6.11.2/msvc2022_64"
+        },
+        "CMAKE_MAKE_PROGRAM": {
+          "type": "FILEPATH",
+          "value": "D:/Qt/Tools/Ninja/ninja.exe"
+        },
+        "CMAKE_CXX_COMPILER": {
+          "type": "FILEPATH",
+          "value": "cl.exe"
+        }
+      },
+      "environment": {
+        "PATH": "D:/Qt/6.11.2/msvc2022_64/bin;$penv{PATH}"
+      }
+    },
+    {
+      "name": "local-dev",
+      "displayName": "Local MSVC + Ninja (Debug)",
+      "inherits": [
+        "dev",
+        "local-msvc-toolchain"
+      ]
+    },
+    {
+      "name": "local-release",
+      "displayName": "Local MSVC + Ninja (Release)",
+      "inherits": [
+        "release",
+        "local-msvc-toolchain"
+      ]
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "local-dev",
+      "configurePreset": "local-dev",
+      "jobs": 4
+    },
+    {
+      "name": "local-release",
+      "configurePreset": "local-release",
+      "jobs": 4
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "local-dev",
+      "configurePreset": "local-dev",
+      "environment": {
+        "PATH": "D:/Qt/6.11.2/msvc2022_64/bin;$penv{PATH}"
+      },
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "local-release",
+      "configurePreset": "local-release",
+      "environment": {
+        "PATH": "D:/Qt/6.11.2/msvc2022_64/bin;$penv{PATH}"
+      },
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    }
+  ]
+}

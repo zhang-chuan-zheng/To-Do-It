@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>To Do It</DisplayName>
+    <Description>离线优先的 Windows 桌面任务清单应用</Description>
+    <Version>@TODOIT_VERSION@</Version>
+    <ReleaseDate>@TODOIT_RELEASE_DATE@</ReleaseDate>
+    <Default>true</Default>
+    <ForcedInstallation>true</ForcedInstallation>
+    <Essential>true</Essential>
+    <Script>installscript.qs</Script>
+    <Licenses>
+        <License name="GNU Lesser General Public License v3" file="LGPL-3.0-only.txt" />
+    </Licenses>
+</Package>
