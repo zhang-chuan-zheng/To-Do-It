@@ -17,7 +17,7 @@ QtObject {
     readonly property int eventFieldGap: 4
     readonly property int eventCardGap: 8
     readonly property int eventDetailsHeight: 142
-    readonly property int attachmentTileSize: 26
+    readonly property int attachmentTileSize: 32
     readonly property int addButtonHeight: 34
     readonly property int helpBarHeight: 22
     readonly property int radiusSmall: 7

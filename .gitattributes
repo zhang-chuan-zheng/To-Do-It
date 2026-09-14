@@ -1,0 +1,51 @@
+# Let Git detect text files by default, then keep repository text deterministic.
+* text=auto
+
+# Cross-platform source, configuration, documentation, and Qt resources.
+*.c              text eol=lf
+*.cc             text eol=lf
+*.cpp            text eol=lf
+*.h              text eol=lf
+*.hh             text eol=lf
+*.hpp            text eol=lf
+*.qml            text eol=lf
+*.qs             text eol=lf
+*.cmake          text eol=lf
+CMakeLists.txt   text eol=lf
+*.qmlproject     text eol=lf
+*.json           text eol=lf
+*.xml            text eol=lf
+*.in             text eol=lf
+*.md             text eol=lf
+*.txt            text eol=lf
+*.svg            text eol=lf
+*.yml            text eol=lf
+*.yaml           text eol=lf
+
+# The application CSV codec emits RFC 4180-style CRLF records.
+*.csv            text eol=crlf
+
+# Native Windows command scripts use Windows line endings.
+*.ps1            text eol=crlf
+*.bat            text eol=crlf
+*.cmd            text eol=crlf
+
+# Binary artifacts must never undergo line-ending conversion.
+*.png            binary
+*.jpg            binary
+*.jpeg           binary
+*.gif            binary
+*.ico            binary
+*.bmp            binary
+*.webp           binary
+*.pdf            binary
+*.zip            binary
+*.7z             binary
+*.exe            binary
+*.dll            binary
+*.lib            binary
+*.pdb            binary
+*.woff           binary
+*.woff2          binary
+*.ttf            binary
+*.otf            binary

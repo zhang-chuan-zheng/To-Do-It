@@ -14,4 +14,3 @@ Rectangle {
     Behavior on fillColor { ColorAnimation { duration: Motion.fastDuration } }
     Behavior on border.color { ColorAnimation { duration: Motion.fastDuration } }
 }
-

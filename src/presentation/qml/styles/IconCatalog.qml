@@ -14,5 +14,9 @@ QtObject {
     property url sortDown: "qrc:/qt/qml/ToDoIt/icons/sort-down.svg"
     property url add: "qrc:/qt/qml/ToDoIt/icons/add.svg"
     property url attachmentAdd: "qrc:/qt/qml/ToDoIt/icons/attachment-add.svg"
+    property url folder: "qrc:/qt/qml/ToDoIt/icons/folder.svg"
     property url palette: "qrc:/qt/qml/ToDoIt/icons/palette.svg"
+    property url donate: "qrc:/qt/qml/ToDoIt/icons/donate.svg"
+    property url arrowRight: "qrc:/qt/qml/ToDoIt/icons/arrow-right.svg"
+    property url donationQr: "qrc:/qt/qml/ToDoIt/images/donation-qr-placeholder.svg"
 }

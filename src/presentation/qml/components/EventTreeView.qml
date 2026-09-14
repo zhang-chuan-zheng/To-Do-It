@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Dialogs
 
 ScrollView {
     id: root
@@ -31,6 +30,8 @@ ScrollView {
     property bool dragInProgress: false
     property string draggedEventId: ""
     property string dragHoverEventId: ""
+    property string dragHoverMode: ""
+    property string settlingEventId: ""
     property int totalSourceCount: 0
     property int summaryMatchedCount: 0
     property string summaryLabel: qsTr("已完成")
@@ -46,7 +47,7 @@ ScrollView {
     signal addRequested()
     signal deleteRequested(string eventId)
     signal helpRequested(string message)
-    signal attachmentOpened(string eventTitle, int attachmentIndex)
+    signal attachmentOpened(string eventTitle, int attachmentIndex, bool folder)
     signal releaseInputFocusRequested()
     signal persistenceRequested(var events)
 
@@ -93,6 +94,38 @@ ScrollView {
                 return index
         }
         return -1
+    }
+
+    function isEventCardHovered(eventId) {
+        const visibleIndex = visibleIndexForId(eventId)
+        if (visibleIndex < 0)
+            return false
+        const delegate = eventRepeater.itemAt(visibleIndex)
+        return delegate ? delegate.pointerHovered : false
+    }
+
+    function scheduleDetailsCloseIfInactive(eventId) {
+        if (eventId.length === 0 || activeDetailsEventId !== eventId)
+            return
+        if (pinnedEventId === eventId || editingDetailsEventId === eventId)
+            return
+        if (isEventCardHovered(eventId)) {
+            hoveredDetailsEventId = eventId
+            detailCloseTimer.stop()
+            return
+        }
+        if (hoveredDetailsEventId === eventId)
+            hoveredDetailsEventId = ""
+        detailCloseTimer.restart()
+    }
+
+    function releasePinnedDetails(eventId) {
+        if (eventId.length === 0 || pinnedEventId !== eventId)
+            return
+        pinnedEventId = ""
+        Qt.callLater(function() {
+            root.scheduleDetailsCloseIfInactive(eventId)
+        })
     }
 
     function effectiveStatus(item) {
@@ -347,7 +380,8 @@ ScrollView {
         sortDirections = directions
     }
 
-    function beginReorderAnimation() {
+    function beginReorderAnimation(eventId) {
+        settlingEventId = eventId || ""
         reorderAnimationActive = true
         reorderAnimationTimer.restart()
     }
@@ -528,6 +562,7 @@ ScrollView {
             dragInProgress = true
             draggedEventId = eventId
             dragHoverEventId = ""
+            dragHoverMode = ""
             pendingDetailsEventId = ""
             deferredHoverEventId = ""
             detailSwitchTimer.stop()
@@ -542,6 +577,7 @@ ScrollView {
         dragInProgress = false
         draggedEventId = ""
         dragHoverEventId = ""
+        dragHoverMode = ""
         if (postDragHoverEventId.length > 0)
             Qt.callLater(function() {
                 root.requestDetailsHover(postDragHoverEventId, true)
@@ -768,6 +804,7 @@ ScrollView {
 
         const target = sourceModel.get(targetIndex)
         dragHoverEventId = targetId
+        dragHoverMode = mode
         let newParentId = target.parentId
         let newOrder = Number(target.manualOrder)
         if (mode === "child") {
@@ -779,9 +816,9 @@ ScrollView {
             newOrder += 0.25
         }
 
+        beginReorderAnimation(draggedId)
         sourceModel.setProperty(draggedIndex, "parentId", newParentId)
         sourceModel.setProperty(draggedIndex, "manualOrder", newOrder)
-        beginReorderAnimation()
         rebuildVisibleModel()
         schedulePersistence()
         helpRequested(mode === "child"
@@ -793,36 +830,57 @@ ScrollView {
         const draggedIndex = sourceIndexForId(draggedId)
         if (draggedIndex < 0)
             return
+        beginReorderAnimation(draggedId)
         sourceModel.setProperty(draggedIndex, "parentId", "")
         sourceModel.setProperty(draggedIndex, "manualOrder", nextChildOrder(""))
-        beginReorderAnimation()
         rebuildVisibleModel()
         schedulePersistence()
         helpRequested(qsTr("事项及其全部子事项已移回一级"))
     }
 
-    function requestAttachments(eventId) {
+    function prepareAttachmentSelection(eventId) {
+        attachmentRevealTimer.stop()
         pendingAttachmentEventId = eventId
         pinnedEventId = eventId
         activateDetails(eventId)
-        attachmentDialog.open()
     }
 
-    function attachSelectedFiles(selectedFiles) {
-        const sourceIndex = sourceIndexForId(pendingAttachmentEventId)
-        if (sourceIndex < 0)
+    function requestAttachmentSelection(eventId) {
+        prepareAttachmentSelection(eventId)
+        attachmentPicker.beginSelection()
+    }
+
+    function attachSelectedEntries(selectedEntries) {
+        const eventId = pendingAttachmentEventId
+        const sourceIndex = sourceIndexForId(eventId)
+        if (sourceIndex < 0) {
+            pendingAttachmentEventId = ""
+            releasePinnedDetails(eventId)
             return
+        }
         const item = sourceModel.get(sourceIndex)
         const paths = item.files.length > 0 ? item.files.split("|") : []
-        for (let index = 0; index < selectedFiles.length; ++index) {
-            const value = String(selectedFiles[index])
+        let addedCount = 0
+        for (let index = 0; index < selectedEntries.length; ++index) {
+            const entry = selectedEntries[index]
+            let value = String(entry.url)
+            if (entry.isFolder && !value.endsWith("/") && !value.endsWith("\\"))
+                value += "/"
             if (paths.indexOf(value) < 0)
                 paths.push(value)
+            else
+                continue
+            ++addedCount
         }
-        sourceModel.setProperty(sourceIndex, "files", paths.join("|"))
-        rebuildVisibleModel()
-        schedulePersistence()
-        helpRequested(qsTr("已关联 %1 个附件").arg(selectedFiles.length))
+        if (addedCount > 0) {
+            sourceModel.setProperty(sourceIndex, "files", paths.join("|"))
+            rebuildVisibleModel()
+            schedulePersistence()
+        }
+        helpRequested(addedCount > 0
+            ? qsTr("已关联 %1 个附件").arg(addedCount)
+            : qsTr("所选附件已经存在"))
+        pendingAttachmentEventId = ""
         attachmentRevealTimer.restart()
     }
 
@@ -849,22 +907,26 @@ ScrollView {
         if (attachmentIndex < 0 || attachmentIndex >= paths.length)
             return
         const path = paths[attachmentIndex]
+        const isFolder = path.endsWith("/") || path.endsWith("\\")
         if (path.indexOf("/") >= 0 || path.indexOf("\\") >= 0)
             Qt.openUrlExternally(path)
-        attachmentOpened(item.titleText, attachmentIndex)
+        attachmentOpened(item.titleText, attachmentIndex, isFolder)
     }
 
     ListModel { id: sourceModel }
 
     ListModel { id: visibleModel }
 
-    FileDialog {
-        id: attachmentDialog
-        title: qsTr("选择要关联的附件")
-        fileMode: FileDialog.OpenFiles
-        nameFilters: [qsTr("所有文件 (*)")]
-        onAccepted: root.attachSelectedFiles(selectedFiles)
-        onRejected: root.pinnedEventId = ""
+    AttachmentPickerDialog {
+        id: attachmentPicker
+        onSelectionAccepted: function(entries) {
+            root.attachSelectedEntries(entries)
+        }
+        onSelectionCancelled: {
+            const eventId = root.pinnedEventId
+            root.pendingAttachmentEventId = ""
+            root.releasePinnedDetails(eventId)
+        }
     }
 
     Timer {
@@ -881,13 +943,16 @@ ScrollView {
     Timer {
         id: attachmentRevealTimer
         interval: 2500
-        onTriggered: root.pinnedEventId = ""
+        onTriggered: root.releasePinnedDetails(root.pinnedEventId)
     }
 
     Timer {
         id: reorderAnimationTimer
         interval: Motion.reorderDuration + 80
-        onTriggered: root.reorderAnimationActive = false
+        onTriggered: {
+            root.reorderAnimationActive = false
+            root.settlingEventId = ""
+        }
     }
 
     Timer {
@@ -895,8 +960,13 @@ ScrollView {
         interval: 240
         onTriggered: {
             if (root.pendingDetailsEventId.length > 0
-                    && root.hoveredDetailsEventId === root.pendingDetailsEventId)
+                    && root.hoveredDetailsEventId === root.pendingDetailsEventId
+                    && root.isEventCardHovered(root.pendingDetailsEventId)) {
                 root.activateDetails(root.pendingDetailsEventId)
+            } else {
+                root.pendingDetailsEventId = ""
+                root.scheduleDetailsCloseIfInactive(root.activeDetailsEventId)
+            }
         }
     }
 
@@ -905,7 +975,8 @@ ScrollView {
         interval: Motion.detailsDuration + 40
         onTriggered: {
             root.detailsTransitionActive = false
-            if (root.transitionTargetHovered) {
+            if (root.transitionTargetHovered
+                    && root.isEventCardHovered(root.activeDetailsEventId)) {
                 root.hoveredDetailsEventId = root.activeDetailsEventId
                 root.deferredHoverEventId = ""
                 return
@@ -913,11 +984,13 @@ ScrollView {
             if (root.deferredHoverEventId.length > 0) {
                 const nextEventId = root.deferredHoverEventId
                 root.deferredHoverEventId = ""
-                root.requestDetailsHover(nextEventId, true)
-                return
+                if (root.isEventCardHovered(nextEventId)) {
+                    root.requestDetailsHover(nextEventId, true)
+                    return
+                }
             }
             root.hoveredDetailsEventId = ""
-            detailCloseTimer.restart()
+            root.scheduleDetailsCloseIfInactive(root.activeDetailsEventId)
         }
     }
 
@@ -926,9 +999,14 @@ ScrollView {
         interval: 420
         onTriggered: {
             if (root.activeDetailsEventId.length > 0
-                    && root.hoveredDetailsEventId !== root.activeDetailsEventId
-                    && root.editingDetailsEventId !== root.activeDetailsEventId)
+                    && root.pinnedEventId !== root.activeDetailsEventId
+                    && root.editingDetailsEventId !== root.activeDetailsEventId
+                    && !root.isEventCardHovered(root.activeDetailsEventId)) {
+                root.hoveredDetailsEventId = ""
+                root.pendingDetailsEventId = ""
+                root.deferredHoverEventId = ""
                 root.activeDetailsEventId = ""
+            }
         }
     }
 
@@ -944,13 +1022,14 @@ ScrollView {
             spacing: Metrics.eventCardGap
             move: Transition {
                 NumberAnimation {
-                    properties: "x,y"
+                    properties: "y"
                     duration: root.reorderAnimationActive ? Motion.reorderDuration : 0
                     easing.type: Motion.standardEasing
                 }
             }
 
             Repeater {
+                id: eventRepeater
                 model: root.eventModel
                 delegate: EventCard {
                     id: eventDelegate
@@ -976,10 +1055,17 @@ ScrollView {
                     x: hierarchyIndent
                     width: eventColumn.width - hierarchyIndent
                     height: implicitHeight
+                    transformOrigin: Item.TopLeft
+                    scale: root.reorderAnimationActive
+                           && root.settlingEventId === eventKey ? 0.98 : 1.0
                     eventId: eventKey
                     draftMode: isDraft
                     detailsActive: root.activeDetailsEventId === eventKey
                     detailsPinned: root.pinnedEventId === eventKey
+                    dragPreviewActive: root.dragInProgress
+                        && root.draggedEventId === eventKey
+                        && root.dragHoverEventId.length > 0
+                    dragPreviewMode: dragPreviewActive ? root.dragHoverMode : ""
                     sequenceText: sequence
                     eventTitle: titleText
                     depth: depthLevel
@@ -1000,7 +1086,7 @@ ScrollView {
                     onMoveRequested: function(draggedId, targetId, mode) {
                         root.moveEvent(draggedId, targetId, mode)
                     }
-                    onAttachmentAddRequested: root.requestAttachments(eventKey)
+                    onAttachmentAddRequested: root.requestAttachmentSelection(eventKey)
                     onAttachmentRemoveRequested: function(attachmentIndex) {
                         root.removeAttachment(eventKey, attachmentIndex)
                     }
@@ -1017,12 +1103,44 @@ ScrollView {
                     onDragStateChanged: function(eventId, dragging) {
                         root.updateDragState(eventId, dragging)
                     }
+                    onDropPreviewChanged: function(targetId, mode) {
+                        if (!root.dragInProgress)
+                            return
+                        if (mode.length > 0) {
+                            root.dragHoverEventId = targetId
+                            root.dragHoverMode = mode
+                        } else if (root.dragHoverEventId === targetId) {
+                            root.dragHoverEventId = ""
+                            root.dragHoverMode = ""
+                        }
+                    }
                     onActivationRequested: root.activateDetails(eventKey)
                     onReleaseInputFocusRequested: root.releaseInputFocusRequested()
                     onEditingStateChanged: function(editing) {
                         root.updateDetailsEditing(eventKey, editing)
                     }
                     onHelpRequested: function(message) { root.helpRequested(message) }
+
+                    Behavior on x {
+                        enabled: root.reorderAnimationActive
+                        NumberAnimation {
+                            duration: Motion.reorderDuration
+                            easing.type: Motion.standardEasing
+                        }
+                    }
+                    Behavior on width {
+                        enabled: root.reorderAnimationActive
+                        NumberAnimation {
+                            duration: Motion.reorderDuration
+                            easing.type: Motion.standardEasing
+                        }
+                    }
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: Motion.dragPreviewDuration
+                            easing.type: Motion.standardEasing
+                        }
+                    }
                 }
             }
 

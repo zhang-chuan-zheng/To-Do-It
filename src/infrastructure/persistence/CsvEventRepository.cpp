@@ -95,8 +95,14 @@ constexpr std::array<const char*, expectedColumnCount> expectedHeader{
 [[nodiscard]] std::optional<QString> decodeUtf8(const std::string& value)
 {
     QStringDecoder decoder(QStringDecoder::Utf8);
-    const auto decoded = decoder.decode(QByteArray(
-        value.data(), static_cast<qsizetype>(value.size())));
+    // QStringDecoder::decode() returns a lazy conversion object. Keep the
+    // source bytes alive and materialize the QString before inspecting or
+    // returning it; otherwise a temporary QByteArray leaves the conversion
+    // object with a dangling reference (for example, "1" may be misread as an
+    // unsupported schema version).
+    const QByteArray encoded(
+        value.data(), static_cast<qsizetype>(value.size()));
+    const QString decoded = decoder.decode(encoded);
     if (decoder.hasError())
         return std::nullopt;
     return decoded;
@@ -356,7 +362,8 @@ application::EventLoadResult CsvEventRepository::load() const
         if (!converted
             || schemaVersion != CsvEventRepository::supportedSchemaVersion)
             return failure(record.line, expectedHeader[0],
-                           "unsupported schema_version");
+                           "unsupported schema_version; expected 1, got '"
+                               + fields[0].toUtf8().toStdString() + "'");
 
         const auto eventId = fields[1].trimmed();
         if (eventId.isEmpty() || QUuid::fromString(eventId).isNull())

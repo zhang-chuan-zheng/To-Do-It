@@ -29,7 +29,13 @@ Item {
         || completionEditor.editing || statusEditor.editing || noteEditor.editing
     property bool detailsPinned: false
     readonly property bool detailsVisible: detailsActive || detailsPinned
+    property bool dragPreviewActive: false
+    property string dragPreviewMode: ""
     property string dropMode: ""
+    readonly property bool childDropActive: dropMode === "child"
+    readonly property bool pointerHovered: cardHover.hovered
+    readonly property bool ordinaryHoverActive: cardHover.hovered
+        && dropMode.length === 0
     signal deleteRequested()
     signal fieldEdited(string field, var value)
     signal moveRequested(string draggedId, string targetId, string mode)
@@ -40,10 +46,13 @@ Item {
     signal titleAccepted(bool pointerInside)
     signal hoverStateChanged(bool hovered)
     signal dragStateChanged(string eventId, bool dragging)
+    signal dropPreviewChanged(string targetId, string mode)
     signal activationRequested()
     signal releaseInputFocusRequested()
     signal editingStateChanged(bool editing)
     signal helpRequested(string message)
+
+    z: cardDrag.active ? 1000 : 0
 
     function pointInsideItem(item, pointInCard) {
         if (!item || !item.mapFromItem)
@@ -70,9 +79,12 @@ Item {
         anchors.fill: parent
         radius: Metrics.radiusMedium
         surfaceLevel: 0
-        interactive: cardHover.hovered || root.editingLocked
-        fillColor: root.dropMode.length > 0 || cardHover.hovered ? Theme.eventHover : Theme.surfaceLow
-        border.color: root.dropMode.length > 0 || cardHover.hovered ? Theme.focusRing : Theme.outline
+        interactive: root.childDropActive || root.ordinaryHoverActive
+            || root.editingLocked
+        fillColor: root.childDropActive || root.ordinaryHoverActive
+            ? Theme.eventHover : Theme.surfaceLow
+        border.color: root.childDropActive || root.ordinaryHoverActive
+            ? Theme.focusRing : Theme.outline
     }
 
     HoverHandler {
@@ -117,23 +129,109 @@ Item {
         }
     }
 
+    Rectangle {
+        anchors.fill: parent
+        z: 50
+        visible: cardDrag.active
+        radius: Metrics.radiusMedium
+        color: Theme.windowBaseColor
+        opacity: 0.58
+        border.width: 1
+        border.color: Theme.outlineStrong
+    }
+
     Item {
         id: dragProxy
-        width: root.width
+        z: 100
+        visible: cardDrag.active
+        width: root.width * (root.dragPreviewMode === "child"
+                            ? 0.94 : (root.dragPreviewActive ? 0.98 : 1.0))
         height: Metrics.eventRowHeight
+        scale: root.dragPreviewActive ? 0.97 : 1.0
+        opacity: 0.94
+        transformOrigin: Item.TopLeft
 
         Drag.active: false
         Drag.source: root
         Drag.keys: ["todoit-event-card"]
         Drag.supportedActions: Qt.MoveAction
         Drag.dragType: Drag.Internal
-        Drag.hotSpot.x: eventRow.x + cardDrag.centroid.pressPosition.x
-        Drag.hotSpot.y: eventRow.y + cardDrag.centroid.pressPosition.y
+        Drag.hotSpot.x: cardDrag.centroid.pressPosition.x
+        Drag.hotSpot.y: cardDrag.centroid.pressPosition.y
+
+        GlassSurface {
+            anchors.fill: parent
+            radius: Metrics.radiusMedium
+            surfaceLevel: 2
+            interactive: true
+            border.color: Theme.focusRing
+        }
+
+        Rectangle {
+            anchors.left: parent.left
+            anchors.leftMargin: Metrics.spacingSmall
+            anchors.verticalCenter: parent.verticalCenter
+            width: 3
+            height: parent.height - Metrics.spacingMedium
+            radius: width / 2
+            color: Theme.accentStrong
+        }
+
+        Row {
+            anchors.left: parent.left
+            anchors.leftMargin: Metrics.spacingLarge
+            anchors.right: parent.right
+            anchors.rightMargin: Metrics.spacingMedium
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: Metrics.spacingSmall
+
+            Label {
+                id: movingSequence
+                text: root.sequenceText
+                color: Theme.textSecondary
+                font.family: Typography.family
+                font.pixelSize: Typography.secondarySize
+            }
+
+            Label {
+                width: Math.max(0, parent.width - movingSequence.width
+                                - movingHint.width - Metrics.spacingSmall * 2)
+                text: root.eventTitle
+                color: Theme.textPrimary
+                font.family: Typography.family
+                font.pixelSize: Typography.bodySize
+                font.weight: Typography.mediumWeight
+                elide: Text.ElideRight
+            }
+
+            Label {
+                id: movingHint
+                text: root.dragPreviewMode === "child"
+                    ? qsTr("将成为子事项")
+                    : (root.dragPreviewActive ? qsTr("调整同级顺序") : qsTr("移动中"))
+                color: Theme.accentStrong
+                font.family: Typography.family
+                font.pixelSize: Typography.captionSize
+            }
+        }
+
+        Behavior on width {
+            NumberAnimation {
+                duration: Motion.dragPreviewDuration
+                easing.type: Motion.standardEasing
+            }
+        }
+        Behavior on scale {
+            NumberAnimation {
+                duration: Motion.dragPreviewDuration
+                easing.type: Motion.standardEasing
+            }
+        }
     }
 
     DragHandler {
         id: cardDrag
-        parent: eventRow
+        parent: root
         target: dragProxy
         acceptedButtons: Qt.LeftButton
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
@@ -173,14 +271,21 @@ Item {
         }
 
         onEntered: function(drag) {
-            if (drag.source && drag.source.eventId !== root.eventId)
+            if (drag.source && drag.source.eventId !== root.eventId) {
                 root.dropMode = modeFor(drag.y)
+                root.dropPreviewChanged(root.eventId, root.dropMode)
+            }
         }
         onPositionChanged: function(drag) {
-            if (drag.source && drag.source.eventId !== root.eventId)
+            if (drag.source && drag.source.eventId !== root.eventId) {
                 root.dropMode = modeFor(drag.y)
+                root.dropPreviewChanged(root.eventId, root.dropMode)
+            }
         }
-        onExited: root.dropMode = ""
+        onExited: {
+            root.dropMode = ""
+            root.dropPreviewChanged(root.eventId, "")
+        }
         onDropped: function(drop) {
             const sourceId = drop.source ? drop.source.eventId : ""
             const requestedMode = modeFor(drop.y)
@@ -198,8 +303,8 @@ Item {
         anchors.right: parent.right
         anchors.top: root.dropMode === "before" ? parent.top : undefined
         anchors.bottom: root.dropMode === "after" ? parent.bottom : undefined
-        height: 2
-        radius: 1
+        height: 3
+        radius: height / 2
         color: Theme.accentStrong
         z: 20
     }

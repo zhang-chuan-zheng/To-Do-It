@@ -113,7 +113,7 @@ Item {
             text: qsTr("备注 · 富文本")
             color: Theme.textSecondary
             font.family: Typography.family
-            font.pixelSize: Typography.captionSize
+            font.pixelSize: Typography.bodySize
             font.weight: Typography.mediumWeight
         }
 
@@ -195,7 +195,7 @@ Item {
         selectionColor: Theme.accent
         selectedTextColor: Theme.windowBaseColor
         font.family: Typography.family
-        font.pixelSize: Typography.secondarySize
+        font.pixelSize: Typography.noteSize
         background: Item {}
         onTextChanged: {
             if (activeFocus && !root.applyingFormat) {

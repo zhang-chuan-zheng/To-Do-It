@@ -5,10 +5,12 @@ set(todoit_qml_files
     "${todoit_qml_root}/pages/MainPage.qml"
     "${todoit_qml_root}/components/AddEventButton.qml"
     "${todoit_qml_root}/components/AppLogo.qml"
+    "${todoit_qml_root}/components/AttachmentPickerDialog.qml"
     "${todoit_qml_root}/components/AttachmentStrip.qml"
     "${todoit_qml_root}/components/BottomHelpBar.qml"
     "${todoit_qml_root}/components/CompactDateEditor.qml"
     "${todoit_qml_root}/components/ColorPalettePopup.qml"
+    "${todoit_qml_root}/components/DonationPopup.qml"
     "${todoit_qml_root}/components/EditableStatusComboBox.qml"
     "${todoit_qml_root}/components/EventCard.qml"
     "${todoit_qml_root}/components/EventTableHeader.qml"
@@ -57,8 +59,15 @@ set_source_files_properties(${todoit_qml_singletons} PROPERTIES
 )
 
 set(todoit_asset_root "${todoit_qml_root}/../../../assets")
+set(todoit_default_app_logo "${todoit_asset_root}/logos/default/app.svg")
+set(todoit_custom_app_logo "${todoit_asset_root}/logos/custom/app.svg")
+set(todoit_app_logo "${todoit_default_app_logo}")
+if(EXISTS "${todoit_custom_app_logo}")
+    set(todoit_app_logo "${todoit_custom_app_logo}")
+endif()
+
 set(todoit_icon_files
-    "${todoit_asset_root}/logos/default/app.svg"
+    "${todoit_app_logo}"
     "${todoit_asset_root}/icons/default/search.svg"
     "${todoit_asset_root}/icons/default/minimize.svg"
     "${todoit_asset_root}/icons/default/maximize.svg"
@@ -70,7 +79,11 @@ set(todoit_icon_files
     "${todoit_asset_root}/icons/default/sort-down.svg"
     "${todoit_asset_root}/icons/default/add.svg"
     "${todoit_asset_root}/icons/default/attachment-add.svg"
+    "${todoit_asset_root}/icons/default/folder.svg"
     "${todoit_asset_root}/icons/default/palette.svg"
+    "${todoit_asset_root}/icons/default/donate.svg"
+    "${todoit_asset_root}/icons/default/arrow-right.svg"
+    "${todoit_asset_root}/images/default/donation-qr-placeholder.svg"
 )
 
 set(todoit_icon_aliases
@@ -86,7 +99,11 @@ set(todoit_icon_aliases
     "sort-down.svg"
     "add.svg"
     "attachment-add.svg"
+    "folder.svg"
     "palette.svg"
+    "donate.svg"
+    "arrow-right.svg"
+    "donation-qr-placeholder.svg"
 )
 
 list(LENGTH todoit_icon_files todoit_icon_count)
@@ -94,8 +111,13 @@ math(EXPR todoit_icon_last_index "${todoit_icon_count} - 1")
 foreach(todoit_icon_index RANGE ${todoit_icon_last_index})
     list(GET todoit_icon_files ${todoit_icon_index} todoit_icon_file)
     list(GET todoit_icon_aliases ${todoit_icon_index} todoit_icon_alias)
+    if(todoit_icon_alias STREQUAL "donation-qr-placeholder.svg")
+        set(todoit_resource_alias "images/${todoit_icon_alias}")
+    else()
+        set(todoit_resource_alias "icons/${todoit_icon_alias}")
+    endif()
     set_source_files_properties("${todoit_icon_file}" PROPERTIES
-        QT_RESOURCE_ALIAS "icons/${todoit_icon_alias}"
+        QT_RESOURCE_ALIAS "${todoit_resource_alias}"
     )
 endforeach()
 

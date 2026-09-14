@@ -19,7 +19,6 @@ target_include_directories(todoit_update_core
 target_link_libraries(todoit_update_core
     PUBLIC
         Qt6::Core
-    PRIVATE
         ToDoIt::Infrastructure
 )
 todoit_enable_warnings(todoit_update_core)

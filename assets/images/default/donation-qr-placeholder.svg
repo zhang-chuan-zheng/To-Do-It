@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
+  <rect x="1" y="1" width="254" height="254" rx="28" fill="#071621" stroke="#72DDFF" stroke-opacity=".65" stroke-width="2"/>
+  <rect x="30" y="30" width="58" height="58" rx="8" stroke="#D8F8FF" stroke-width="8"/>
+  <rect x="168" y="30" width="58" height="58" rx="8" stroke="#D8F8FF" stroke-width="8"/>
+  <rect x="30" y="168" width="58" height="58" rx="8" stroke="#D8F8FF" stroke-width="8"/>
+  <path d="M112 44h20v20h-20zM112 82h20v20h-20zM146 108h20v20h-20zM184 112h20v20h-20zM112 146h20v20h-20zM146 164h20v20h-20zM184 146h20v20h-20zM112 198h20v20h-20zM164 198h20v20h-20zM202 184h20v38h-20z" fill="#74DFFF" fill-opacity=".66"/>
+  <rect x="45" y="45" width="28" height="28" rx="4" fill="#74DFFF" fill-opacity=".8"/>
+  <rect x="183" y="45" width="28" height="28" rx="4" fill="#74DFFF" fill-opacity=".8"/>
+  <rect x="45" y="183" width="28" height="28" rx="4" fill="#74DFFF" fill-opacity=".8"/>
+  <rect x="66" y="106" width="124" height="44" rx="16" fill="#071621" stroke="#55D7FF" stroke-opacity=".55"/>
+  <text x="128" y="126" fill="#E7FAFF" font-family="Microsoft YaHei UI, sans-serif" font-size="13" text-anchor="middle">打赏二维码</text>
+  <text x="128" y="143" fill="#8FBECB" font-family="Microsoft YaHei UI, sans-serif" font-size="10" text-anchor="middle">请替换此占位图片</text>
+</svg>

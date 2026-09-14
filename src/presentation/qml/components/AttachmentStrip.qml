@@ -22,6 +22,8 @@ Item {
     }
 
     function displayKind(value) {
+        if (isFolderAttachment(value))
+            return qsTr("文件夹")
         const path = displayPath(value)
         const dotIndex = path.lastIndexOf(".")
         if (dotIndex < 0 || dotIndex === path.length - 1)
@@ -29,9 +31,14 @@ Item {
         return path.substring(dotIndex + 1).toUpperCase().substring(0, 4)
     }
 
+    function isFolderAttachment(value) {
+        const text = String(value)
+        return text.endsWith("/") || text.endsWith("\\")
+    }
+
     Row {
         anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         spacing: Metrics.spacingTiny
 
         Label {
@@ -40,8 +47,10 @@ Item {
             text: qsTr("附件")
             color: Theme.textSecondary
             font.family: Typography.family
-            font.pixelSize: Typography.captionSize
-            verticalAlignment: Text.AlignVCenter
+            font.pixelSize: Typography.bodySize
+            font.weight: Typography.mediumWeight
+            topPadding: 1
+            verticalAlignment: Text.AlignTop
         }
 
         Repeater {
@@ -55,14 +64,26 @@ Item {
                 hoverEnabled: true
                 text: root.displayKind(modelData)
 
-                contentItem: Label {
-                    text: attachmentTile.text
-                    color: Theme.textSecondary
-                    font.family: Typography.family
-                    font.pixelSize: 8
-                    font.weight: Typography.mediumWeight
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
+                contentItem: Item {
+                    IconImage {
+                        visible: root.isFolderAttachment(attachmentTile.modelData)
+                        anchors.centerIn: parent
+                        width: 18
+                        height: 18
+                        source: IconCatalog.folder
+                        accessibleName: qsTr("文件夹附件")
+                    }
+                    Label {
+                        visible: !root.isFolderAttachment(attachmentTile.modelData)
+                        anchors.fill: parent
+                        text: attachmentTile.text
+                        color: Theme.textSecondary
+                        font.family: Typography.family
+                        font.pixelSize: 8
+                        font.weight: Typography.mediumWeight
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
                 }
                 background: GlassSurface {
                     radius: Metrics.radiusSmall
@@ -94,12 +115,13 @@ Item {
         }
 
         RoundIconButton {
+            id: addButton
             width: Metrics.attachmentTileSize
             height: Metrics.attachmentTileSize
             iconText: ""
             iconSource: IconCatalog.attachmentAdd
             iconSize: 24
-            helpText: qsTr("添加一个或多个附件")
+            helpText: qsTr("添加文件或文件夹附件")
             onClicked: root.addRequested()
         }
     }
