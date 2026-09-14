@@ -119,8 +119,10 @@ Item {
                         }
                     }
                     onHelpRequested: function(message) { root.showHelp(message) }
-                    onAttachmentOpened: function(eventTitle, attachmentIndex) {
-                        root.showHelp(qsTr("%1 的附件已打开，请注意所有修改均将被保存！").arg(eventTitle))
+                    onAttachmentOpened: function(eventTitle, attachmentIndex, folder) {
+                        root.showHelp(folder
+                            ? qsTr("%1 的附件文件夹已打开").arg(eventTitle)
+                            : qsTr("%1 的附件已打开，请注意所有修改均将被保存！").arg(eventTitle))
                     }
                     onReleaseInputFocusRequested: root.forceActiveFocus(Qt.MouseFocusReason)
                 }
@@ -130,6 +132,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: Metrics.helpBarHeight
             message: root.helpText
+            onHelpRequested: function(message) { root.showHelp(message) }
         }
     }
 }

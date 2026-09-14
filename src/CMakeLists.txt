@@ -20,7 +20,6 @@ target_link_libraries(ToDoIt
         ToDoIt::WindowsPlatform
         Qt6::Quick
         Qt6::QuickControls2
-        Qt6::QuickDialogs2
         Qt6::QuickEffects
 )
 

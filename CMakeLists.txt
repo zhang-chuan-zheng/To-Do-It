@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 
 project(ToDoIt
-    VERSION 0.1.0
+    VERSION 0.2.0
     DESCRIPTION "Offline Windows task list application"
     LANGUAGES CXX
 )
@@ -20,7 +20,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
 option(TODOIT_WARNINGS_AS_ERRORS "Treat To Do It compiler warnings as errors" OFF)
 
-find_package(Qt6 6.11 REQUIRED COMPONENTS Quick QuickControls2 QuickDialogs2 QuickEffects)
+find_package(Qt6 6.11 REQUIRED COMPONENTS Quick QuickControls2 QuickEffects)
 qt_standard_project_setup(REQUIRES 6.11)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")

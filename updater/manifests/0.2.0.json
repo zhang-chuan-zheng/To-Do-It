@@ -1,0 +1,46 @@
+{
+  "appVersion": "0.2.0",
+  "eventSchema": 1,
+  "settingsSchema": 1,
+  "eventSchemas": [
+    {
+      "version": 1,
+      "columns": [
+        { "name": "schema_version", "default": "1" },
+        { "name": "event_id", "default": "" },
+        { "name": "parent_id", "default": "" },
+        { "name": "sibling_order", "default": "0" },
+        { "name": "title", "default": "" },
+        { "name": "importance", "default": "5" },
+        { "name": "start_at", "default": "" },
+        { "name": "completed_at", "default": "" },
+        { "name": "status", "default": "" },
+        { "name": "note_html", "default": "" },
+        { "name": "attachments_json", "default": "[]" },
+        { "name": "created_at", "default": "" },
+        { "name": "updated_at", "default": "" }
+      ]
+    }
+  ],
+  "eventMigrations": [],
+  "programChanges": {
+    "summary": "Second preview release with CSV-backed task editing, hierarchical drag and drop, folder attachments, rich notes, and a refined graphite interface",
+    "added": [
+      "Hierarchical drag and drop with child, sibling, and root placement",
+      "Unified file and folder attachment picker",
+      "Selection-based rich-note bold and RGB/CMYK color formatting",
+      "Replaceable donation image entry"
+    ],
+    "changed": [
+      "Connected the main page exclusively to event.csv with dirty-only five-minute persistence",
+      "Rebuilt the main page with the finalized compact graphite visual system",
+      "Improved hover-detail lifecycle, focus release, scrolling, sorting, and reorder animation",
+      "Hardened schema_version decoding and event snapshot validation",
+      "Applied a true rounded alpha mask to the complete window background"
+    ],
+    "removed": [
+      "Built-in demonstration event rows",
+      "Experimental liquid-glass theme switch"
+    ]
+  }
+}

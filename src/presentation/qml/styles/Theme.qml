@@ -18,6 +18,7 @@ QtObject {
     readonly property color outlineStrong: Qt.rgba(0.92, 0.95, 1, 0.24)
     readonly property color fieldOutline: Qt.rgba(0.92, 0.95, 1, 0.22)
     readonly property color highlight: Qt.rgba(1, 1, 1, 0.16)
+    readonly property color popupTint: Qt.rgba(0.105, 0.12, 0.14, 0.84)
     readonly property color textPrimary: "#E8EBEF"
     readonly property color textSecondary: "#B6BBC4"
     readonly property color textMuted: "#818892"

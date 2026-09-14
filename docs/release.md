@@ -2,6 +2,8 @@
 
 本文是当前发布链路的操作手册。工程采用 Qt Installer Framework（Qt IFW）：首次安装使用包含应用载荷的混合安装器，安装目录中的 `ToDoItMaintenanceTool.exe` 同时承担在线更新、离线更新和卸载。GitHub Releases 保存面向用户的下载附件，GitHub Pages 保存维护工具可读取的 Qt IFW 更新仓库。
 
+当前待发布应用版本为 0.2.0，`eventSchema=1`、`settingsSchema=1`。历史 `updater/manifests/0.1.0.json` 必须保留且不可覆盖；本次使用新增的 `updater/manifests/0.2.0.json`。
+
 发布脚本不会编译源码，也不会上传 GitHub。开发者必须先自行完成 Release 构建和验证，再运行脚本整理发布物。
 
 ## 1. 发布物与数据边界
@@ -157,7 +159,7 @@ $UpdateUrl = "https://OWNER.github.io/REPOSITORY/updates/windows/x64"
 git init
 git branch -M main
 git add .
-git commit -m "chore: prepare To Do It v0.1.0"
+git commit -m "chore: prepare To Do It v0.2.0"
 git remote add origin https://github.com/OWNER/REPOSITORY.git
 git push -u origin main
 ```
@@ -165,9 +167,9 @@ git push -u origin main
 提交前用 `git status` 确认没有 `build/`、`out/`、`data/event.csv`、Qt SDK、许可证私有工作目录或本机预设。以后每次发布先在 `main` 完成代码审查和测试，再创建不可复用的版本标签：
 
 ```powershell
-git tag -a v0.1.0 -m "To Do It 0.1.0"
+git tag -a v0.2.0 -m "To Do It 0.2.0"
 git push origin main
-git push origin v0.1.0
+git push origin v0.2.0
 ```
 
 ## 8. 发布 GitHub Pages 更新仓库

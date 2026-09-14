@@ -22,7 +22,17 @@
       "sortDown": "sort-down.svg",
       "add": "add.svg",
       "attachmentAdd": "attachment-add.svg",
-      "palette": "palette.svg"
+      "folder": "folder.svg",
+      "palette": "palette.svg",
+      "donate": "donate.svg",
+      "arrowRight": "arrow-right.svg"
+    }
+  },
+  "images": {
+    "defaultRoot": "assets/images/default",
+    "customRoot": "data/customization/images",
+    "files": {
+      "donationQr": "donation-qr-placeholder.svg"
     }
   },
   "backgrounds": {

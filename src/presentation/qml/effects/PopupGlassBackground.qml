@@ -45,8 +45,7 @@ Rectangle {
     Rectangle {
         anchors.fill: parent
         radius: surface.radius
-        color: Theme.windowBaseColor
-        opacity: 0.84
+        color: Theme.popupTint
     }
 
     Rectangle {
