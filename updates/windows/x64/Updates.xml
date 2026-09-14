@@ -6,19 +6,19 @@
   <Name>com.todoit.app</Name>
   <DisplayName>To Do It</DisplayName>
   <Description>离线优先的 Windows 桌面任务清单应用</Description>
-  <Version>0.1.0</Version>
-  <ReleaseDate>2026-09-10</ReleaseDate>
+  <Version>0.2.0</Version>
+  <ReleaseDate>2026-09-15</ReleaseDate>
   <Default>true</Default>
   <ForcedInstallation>true</ForcedInstallation>
   <Essential>true</Essential>
   <Script>installscript.qs</Script>
-  <UpdateFile CompressedSize="48129991" OS="Any" UncompressedSize="134128108"/>
+  <UpdateFile CompressedSize="47699170" OS="Any" UncompressedSize="131471683"/>
   <DownloadableArchives>assets.7z,bin.7z,defaults.7z,licenses.7z,plugins.7z,qml.7z,translations.7z,content.7z</DownloadableArchives>
   <Licenses>
    <License file="LGPL-3.0-only.txt" name="GNU Lesser General Public License v3"/>
   </Licenses>
-  <SHA1>e524d5e051c1b9e434c9d881fe68b1ce502c7e3f</SHA1>
+  <SHA1>e1f4b8f5fbbd3130b8ac8e022713c76ad6954175</SHA1>
  </PackageUpdate>
- <SHA1>bc84d50b763dc2c4f5b771926c05b67839422049</SHA1>
- <MetadataName>2026-09-10-0105_meta.7z</MetadataName>
+ <SHA1>f99a84b9e8456e20eba23ed17446ae1ec16d4e23</SHA1>
+ <MetadataName>2026-09-15-0121_meta.7z</MetadataName>
 </Updates>
