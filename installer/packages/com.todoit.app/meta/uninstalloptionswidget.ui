@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>UninstallOptionsWidget</class>
+ <widget class="QWidget" name="UninstallOptionsWidget">
+  <property name="minimumSize"><size><width>700</width><height>450</height></size></property>
+  <property name="windowTitle"><string>卸载选项</string></property>
+  <layout class="QVBoxLayout" name="UninstallOptionsLayout">
+   <property name="leftMargin"><number>36</number></property>
+   <property name="topMargin"><number>28</number></property>
+   <property name="rightMargin"><number>36</number></property>
+   <property name="bottomMargin"><number>22</number></property>
+   <property name="spacing"><number>14</number></property>
+   <item><widget class="QLabel" name="UninstallTitle"><property name="text"><string>卸载 To Do It</string></property></widget></item>
+   <item><widget class="QLabel" name="UninstallSubtitle"><property name="text"><string>请选择用户数据的处理方式</string></property></widget></item>
+   <item><spacer name="TopSpacer"><property name="orientation"><enum>Qt::Vertical</enum></property><property name="sizeHint" stdset="0"><size><width>20</width><height>10</height></size></property></spacer></item>
+   <item>
+    <widget class="QFrame" name="KeepDataCard">
+     <property name="minimumSize"><size><width>0</width><height>112</height></size></property>
+     <layout class="QVBoxLayout" name="KeepDataLayout"><property name="leftMargin"><number>20</number></property><property name="topMargin"><number>14</number></property><property name="rightMargin"><number>20</number></property><property name="bottomMargin"><number>14</number></property><property name="spacing"><number>4</number></property>
+      <item><widget class="QRadioButton" name="KeepDataRadio"><property name="text"><string>保留我的数据（推荐）</string></property><property name="checked"><bool>true</bool></property></widget></item>
+      <item><widget class="QLabel" name="KeepDataDescription"><property name="text"><string>保留 event.csv、用户配置、迁移备份和更新日志；重新安装后可继续使用</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="DeleteDataCard">
+     <property name="minimumSize"><size><width>0</width><height>132</height></size></property>
+     <layout class="QVBoxLayout" name="DeleteDataLayout"><property name="leftMargin"><number>20</number></property><property name="topMargin"><number>14</number></property><property name="rightMargin"><number>20</number></property><property name="bottomMargin"><number>14</number></property><property name="spacing"><number>4</number></property>
+      <item><widget class="QRadioButton" name="DeleteDataRadio"><property name="text"><string>同时删除所有用户数据</string></property></widget></item>
+      <item><widget class="QLabel" name="DeleteDataDescription"><property name="text"><string>永久删除事项、备注、附件关联、配置、备份和日志</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+      <item><widget class="QLabel" name="DangerText"><property name="text"><string>⚠ 此操作无法撤销，继续前将要求再次确认</string></property></widget></item>
+     </layout>
+    </widget>
+   </item>
+   <item><spacer name="BottomSpacer"><property name="orientation"><enum>Qt::Vertical</enum></property><property name="sizeHint" stdset="0"><size><width>20</width><height>30</height></size></property></spacer></item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

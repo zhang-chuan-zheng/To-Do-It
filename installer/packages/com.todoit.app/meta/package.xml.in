@@ -8,6 +8,10 @@
     <ForcedInstallation>true</ForcedInstallation>
     <Essential>true</Essential>
     <Script>installscript.qs</Script>
+    <UserInterfaces>
+        <UserInterface>welcomewidget.ui</UserInterface>
+        <UserInterface>uninstalloptionswidget.ui</UserInterface>
+    </UserInterfaces>
     <Licenses>
         <License name="GNU Lesser General Public License v3" file="LGPL-3.0-only.txt" />
     </Licenses>

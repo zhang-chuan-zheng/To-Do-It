@@ -1,6 +1,6 @@
 # To Do It 项目结构与代码职责
 
-> 文档版本：v1.12
+> 文档版本：v1.13
 > 用途：项目唯一且强制维护的程序开发手册；包含所有项目文件、目录、公开函数和核心逻辑的注释  
 > 适用基线：C++20、Qt 6.11.2、Qt Quick/QML、MSVC x64、Ninja 1.12.1、CMake 3.24+
 
@@ -87,7 +87,7 @@ To Do It/
 │  │  └─ default/app.svg                           [现有]
 │  ├─ quotes/                                      [现有]
 │  │  ├─ README.md                                 [现有]
-│  │  └─ philosophy_quotes.json                    [计划]
+│  │  └─ philosophy_quotes.json                    [现有]
 │  └─ themes/                                      [现有]
 │     ├─ README.md                                 [现有]
 │     ├─ default-theme.json                        [计划]
@@ -113,12 +113,16 @@ To Do It/
 │  └─ structure.md                                 [现有]
 ├─ installer/                                      [现有]
 │  ├─ README.md                                    [现有]
-│  ├─ config/config.xml.in                         [现有]
+│  ├─ config/                                      [现有]
+│  │  ├─ config.xml.in                             [现有]
+│  │  └─ style.qss                                 [现有]
 │  ├─ controller/installer-controller.qs           [现有]
 │  ├─ update/{apply-update.ps1,README.txt}          [现有]
 │  └─ packages/com.todoit.app/meta/
 │     ├─ package.xml.in                            [现有]
-│     └─ installscript.qs                          [现有]
+│     ├─ installscript.qs                          [现有]
+│     ├─ welcomewidget.ui                          [现有]
+│     └─ uninstalloptionswidget.ui                 [现有]
 ├─ scripts/                                        [现有]
 │  ├─ README.md                                    [现有]
 │  ├─ Initialize-MsvcEnvironment.ps1               [现有]
@@ -178,7 +182,8 @@ To Do It/
    ├─ UpdateHistoryWriter.{h,cpp}                  [现有]
    ├─ UpdateReport.h                               [现有]
    ├─ manifests/0.1.0.json                         [现有历史发布]
-   ├─ manifests/0.2.0.json                         [现有当前发布]
+   ├─ manifests/0.2.0.json                         [现有历史发布]
+   ├─ manifests/0.2.1.json                         [现有当前发布]
    └─ README.md                                    [现有]
 ```
 
@@ -229,6 +234,7 @@ To Do It/
 | `assets/logos/default/README.md` | 登记发行回退 `app.svg`、稳定资源键，以及开发期和运行期自定义 Logo 不得覆盖默认资源的约束。 |
 | `assets/logos/default/app.svg` | To Do It 默认灰色圆角复选标志；当 `assets/logos/custom/app.svg` 不存在时打包为 `IconCatalog.appLogo` 的稳定资源。 |
 | `assets/quotes/README.md` | 本地名言数据的出处、长度与审核规则。 |
+| `assets/quotes/philosophy_quotes.json` | 版本化离线哲学名言库；当前包含 1000 条带作者、作品出处、篇章位置、文本类型、主题标签和核验状态的记录。 |
 | `assets/themes/README.md` | 主题令牌、渐变、颜色和背景资源边界。 |
 | `assets/themes/backgrounds/README.md` | 默认背景图片目录及自定义镜像规则。 |
 | `cmake/CompilerWarnings.cmake` | 为项目目标统一启用 MSVC/GNU/Clang 高等级警告。 |
@@ -238,13 +244,16 @@ To Do It/
 | `data/README.md` | 开发期本地 `event.csv` 的原子读写、加载失败锁止写回、忽略规则，以及与真实安装数据的隔离边界。 |
 | `data/event.csv` | 开发启动默认读取的本地事件文件；当前仅含带 UTF-8 BOM 的 13 列正式表头，不含内置示例事件，不提交版本库。 |
 | `docs/proposal.md` | 已确认产品需求、平台约束、已验证工具链事实与后续需求变更规则。 |
-| `docs/release.md` | Release 构建前提、当前 0.2.0 发布目标、Qt IFW 混合安装器、GitHub Pages 在线仓库、GitHub Release、离线更新、卸载、版本/字段迁移规则和发布门禁。 |
+| `docs/release.md` | Release 构建前提、当前 0.2.1 发布目标、Qt IFW 混合安装器、GitHub Pages 在线仓库、GitHub Release、离线更新、安装运行库布局、卸载数据选择、版本/字段迁移规则和发布门禁。 |
 | `docs/structure.md` | 本程序开发手册自身；任何项目更改必须同步维护对应注释。 |
 | `installer/README.md` | CMake Install/Qt 部署到 Qt IFW 混合安装器、在线/离线仓库的边界，并规定更新不覆盖数据、迁移先备份校验、卸载默认保留数据。 |
-| `installer/config/config.xml.in` | Qt IFW 全局配置模板；定义每用户默认目录、维护工具、许可、本地仓库权限及可选远程仓库占位符，版本和仓库 XML 由打包脚本替换。 |
-| `installer/controller/installer-controller.qs` | 安装控制脚本；从 `LOCALAPPDATA` 计算默认目录，同时保留目录选择页面。 |
-| `installer/packages/com.todoit.app/meta/package.xml.in` | 应用组件元数据模板；声明版本、发布日期、强制/关键组件、许可和组件脚本。 |
-| `installer/packages/com.todoit.app/meta/installscript.qs` | 停止主进程，先布置程序与快捷方式，最后调用迁移器；迁移失败使 IFW 维护事务失败，数据不进入组件归档。 |
+| `installer/config/config.xml.in` | Qt IFW 全局配置模板；定义每用户默认目录、维护工具、许可、本地仓库权限及可选远程仓库占位符，并固定 Classic 向导、左侧步骤列表、1120×720 基准窗口和 `style.qss`；版本和仓库 XML 由打包脚本替换。 |
+| `installer/config/style.qss` | 安装器唯一视觉主题；统一石墨背景、圆角卡片、青蓝主按钮、高对比度复选/单选框、文本框、许可正文、进度条、滚动条、列表、消息框和禁用状态。可编辑颜色/间距/控件状态，不得隐藏许可同意入口或用颜色掩盖错误。 |
+| `installer/controller/installer-controller.qs` | 安装控制脚本；从 `LOCALAPPDATA` 计算默认目录，中文化各阶段标题、说明和按钮，确保许可同意框可见，按安装/更新/管理/卸载切换摘要和完成信息，对永久删除数据执行二次确认，并仅在卸载成功信号后清理 `[InstallDir]/data`。 |
+| `installer/packages/com.todoit.app/meta/package.xml.in` | 应用组件元数据模板；声明版本、发布日期、强制/关键组件、LGPLv3 许可、组件脚本，以及欢迎页和卸载数据选择页两个动态 UI。 |
+| `installer/packages/com.todoit.app/meta/installscript.qs` | 停止主进程；首装时以动态欢迎页替换默认介绍页并隐藏无意义的组件/开始菜单页；维护模式切换到卸载时动态加入数据选项页并记录保留/删除选择；标准文件操作后创建快捷方式并在安装/更新末尾调用迁移器。 |
+| `installer/packages/com.todoit.app/meta/welcomewidget.ui` | 首次安装欢迎页；展示版本化标题、本地保存、层级事项、安全更新和“不覆盖 event.csv”说明。版本占位符由打包脚本替换，允许编辑文案与布局，不承载安装事务。 |
+| `installer/packages/com.todoit.app/meta/uninstalloptionswidget.ui` | 卸载数据处理页；默认选中保留 `event.csv`/配置/备份/日志，另提供永久删除选项和不可撤销警告；只收集选择，真正二次确认及清理由控制脚本完成。 |
 | `installer/update/apply-update.ps1` | 验证解压的本地仓库与安装目录，只为当次维护工具进程添加临时 `file:///` 仓库并更新固定组件 ID。 |
 | `installer/update/README.txt` | 随离线更新 ZIP 分发的默认/自定义安装目录操作说明。 |
 | `scripts/README.md` | 列出已实现的配置/构建/测试/结构门禁脚本、参数边界和不修改 PATH/不重复业务逻辑规则。 |
@@ -254,7 +263,7 @@ To Do It/
 | `scripts/build.ps1` | 导入 MSVC 后用指定 Build Preset 构建，可限制并行度或通过 `-Target` 构建单一目标；失败必须原样传播。 |
 | `scripts/test.ps1` | 用绝对 CTest 路径和指定 Test Preset 运行测试，可限制并行度；只可编辑测试编排，不得隐藏失败。 |
 | `scripts/run.ps1` | 在当前进程 PATH 前置 Qt MSVC 运行库目录，并在本地数据文件存在时为子进程设置 `TODOIT_EVENT_FILE` 后启动构建产物；不部署文件、不持久修改环境。 |
-| `scripts/package.ps1` | 不编译；部署已构建的 Release、填充 IFW 模板，按是否传入 HTTPS 仓库地址生成混合或纯离线安装器，并产出在线仓库、离线更新 ZIP、发布清单/元数据及 SHA-256。 |
+| `scripts/package.ps1` | 不编译；部署已构建的 Release，要求主程序/迁移器/`qt.conf`/核心 Qt DLL 共处安装根并验证平台/QML 插件，拒绝 DLL 错落 `bin/` 的不可启动布局；填充 IFW XML、控制脚本和欢迎页版本，占用统一 QSS/卸载页，按是否传入 HTTPS 仓库地址生成混合或纯离线安装器，并产出在线仓库、离线更新 ZIP、发布清单/元数据及 SHA-256。 |
 | `scripts/prepare-github-release.ps1` | 不联网；核对版本/GitHub 标识、安装器固化的 GitHub Pages 地址和附件 SHA-256，把精确版本的 Release 附件及可部署 Pages 目录整理到受项目根边界保护的 `out/github-publish/`。 |
 | `src/CMakeLists.txt` | 创建主程序目标、链接 Qt Quick/Controls/Effects，在同一作用域注册 QML 模块，并生成包含 `Qt.labs.folderlistmodel` 等扫描导入的 CMake Install Qt QML 自包含部署脚本。 |
 | `src/.qmlls.ini` | Qt/CMake 为 QML Language Server 生成的导入路径提示；由 `QT_QML_GENERATE_QMLLS_INI` 重建、已忽略，禁止手改。 |
@@ -344,8 +353,9 @@ To Do It/
 | `updater/UpdateHistoryWriter.h` | 声明不记录事项正文的 JSONL 更新历史追加接口。 |
 | `updater/UpdateHistoryWriter.cpp` | 追加版本、架构、文件变更、数量、哈希、备份位置、时间和结果；日志失败显式返回。 |
 | `updater/manifests/0.1.0.json` | 首个发布清单；固定应用 0.1.0、event schema 1、settings schema 1，登记 13 个稳定字段及字符串缺省值，不声明不存在的旧格式迁移。 |
-| `updater/manifests/0.2.0.json` | 当前不可变发布清单；固定应用 0.2.0，继续使用 event/settings schema 1 和相同 13 字段，不声明字段迁移，并记录本版程序增删改摘要。 |
-| `updater/README.md` | 独立迁移器的职责、0.2.0 同架构更新说明、同名字段复制/新增缺省/显式删除策略、安全失败和未来架构升级门禁。 |
+| `updater/manifests/0.2.0.json` | 不可变历史发布清单；固定应用 0.2.0，继续使用 event/settings schema 1 和相同 13 字段，不声明字段迁移，并记录本版程序增删改摘要。 |
+| `updater/manifests/0.2.1.json` | 当前发布清单；固定应用 0.2.1，继续使用 event/settings schema 1 与相同 13 字段，空迁移链表明只校验/备份而不改写 CSV，并记录安装器 UI 与 Qt 运行库部署修复。发布后不可回写。 |
+| `updater/README.md` | 独立迁移器的职责、0.2.1 同架构更新及 0.2.0 历史清单说明、同名字段复制/新增缺省/显式删除策略、安全失败和未来架构升级门禁。 |
 
 不提交的 `CMakeUserPresets.json` 已按本机 Qt 工具链生成，其职责见第 4 节；`.vs/`、`build/` 等可重建文件由第 13 节的生成规则统一覆盖。
 
@@ -380,7 +390,8 @@ To Do It/
 
 主要逻辑：
 
-- `project(ToDoIt VERSION 0.2.0)`：当前唯一应用版本来源；发布时同步安装包版本。
+- `project(ToDoIt VERSION 0.2.1)`：当前唯一应用版本来源；发布时同步安装包版本。
+- Windows 在发现 Qt 前把 `CMAKE_INSTALL_BINDIR` 设为 `.`，使 `qt_generate_deploy_qml_app_script()` 把普通 Qt 运行库部署到 `ToDoIt.exe` 同目录；平台插件和 QML 导入仍分别位于 `plugins/`、`qml/`。
 - `CMAKE_CXX_STANDARD 20`：要求 C++20 且关闭编译器扩展。
 - `CMAKE_MSVC_RUNTIME_LIBRARY`：MSVC 使用动态运行库，Debug 对应 `/MDd`，Release 对应 `/MD`，与 Qt 官方 MSVC 二进制保持一致。
 - 三类输出目录：可执行文件和 DLL 放到 `build/<preset>/bin`，静态库/导入库放到 `build/<preset>/lib`。
@@ -450,11 +461,13 @@ To Do It/
 
 可编辑内容：SVG 的路径、描边、填色和几何形状。文件名是资源契约；如需重命名，必须同时修改 `config/default-resources.json`、`IconCatalog.qml`、QML 资源清单及本开发手册。
 
-#### `assets/quotes/philosophy_quotes.json` `[计划]`
+#### `assets/quotes/philosophy_quotes.json` `[现有]`
 
-每条记录包含 `id`、`text`、`author`、`source`、`verified`。`QuoteRepository::load()` 拒绝缺少作者/出处、未核验或默认窗口下需缩至 50% 以下才可显示的文本。
+顶层使用 `schemaVersion`、`language`、`count`、`editorialPolicy`、`sources` 和 `quotes`。当前版本为 `1`，语言为 `zh-CN`，包含 1000 条离线内容；`sources` 登记 CC0 中国古典文献语料以及用于交叉核对的 Chinese Text Project、Marxists Internet Archive 和 Project Gutenberg。
 
-可编辑内容：经核验的短名言及出处。不得录入来源不明的网络语录。
+每条记录保留稳定字段 `id`、`text`、`author`、`source`、`verified`，并以 `sourceLocator`、`textType`、`tags` 分别记录篇章位置、原文/意译性质和主题。`textType: 原文` 表示来自列明公有领域底本的短句；`textType: 意译` 表示依据列明著作编辑的非逐字引文。计划中的 `QuoteRepository::load()` 应拒绝重复 ID、重复正文、缺少作者/出处、未核验或默认窗口下需缩至 50% 以下才可显示的记录，并验证顶层 `count` 与数组长度一致。
+
+可编辑内容：经核验的短名言、作品出处、篇章位置、文本类型与主题标签。不得录入来源不明的网络语录；编辑后必须同步顶层 `count` 和本开发手册。
 
 #### `assets/themes/default-theme.json` `[计划]`
 
@@ -1171,23 +1184,47 @@ QWindowKit 1.5.0 源码固定快照，Apache-2.0。仅构建 Core 与 Quick；�
 
 #### `installer/config/config.xml.in` `[现有]`
 
-定义产品名、版本占位符、发布者、开始菜单目录、每用户默认安装目录、维护工具名、窗口尺寸、许可证页面和卸载不删除根目录策略。`@TODOIT_REMOTE_REPOSITORIES@` 由打包脚本替换为空字符串或一个固定 HTTPS 仓库；仓库设置页面对用户隐藏，`SaveDefaultRepositories=true` 明确让维护工具保存正式仓库，`AllowRepositoriesForOfflineInstaller` 同时允许离线脚本传入当次临时本地仓库。
+定义产品名、版本占位符、发布者、开始菜单目录、每用户默认安装目录、维护工具名、许可证页面和卸载不删除根目录策略。向导使用 `Classic`、显示左侧页面列表、加载 `style.qss`，基准尺寸为 1120×720，标题文本颜色与石墨主题一致。`@TODOIT_REMOTE_REPOSITORIES@` 由打包脚本替换为空字符串或一个固定 HTTPS 仓库；仓库设置页面对用户隐藏，`SaveDefaultRepositories=true` 明确让维护工具保存正式仓库，`AllowRepositoriesForOfflineInstaller` 同时允许离线脚本传入当次临时本地仓库。
+
+#### `installer/config/style.qss` `[现有]`
+
+集中定义整个 Qt Widgets/IFW 界面的视觉状态：深石墨窗口和页面、左侧步骤列表、内容卡片、Microsoft YaHei UI、青蓝默认按钮、禁用按钮、高对比度许可复选框、卡片式维护/卸载单选项、输入框、正文浏览器、进度条、完整滚动条和消息框。所有控件同时声明 normal/hover/pressed/checked/disabled/focus 中适用的状态，修改主题时必须保留可读对比度、键盘焦点和许可控件可见性。
 
 #### `installer/controller/installer-controller.qs` `[现有]`
 
-- `Controller()`：读取 `LOCALAPPDATA`，将默认目录设为当前用户的 `Programs/ToDoIt`；目标目录页面仍允许用户修改。
+- `Controller()`：首次安装时读取 `LOCALAPPDATA`，将默认目录设为当前用户的 `Programs/ToDoIt`；初始化保留数据状态、关闭仓库设置入口，并连接成功卸载信号。目标目录页面仍允许用户修改。
+- `setPageHeading()`、`setChildText()`、`setStandardButtons()`：对不存在的默认页/控件安全返回，统一页面标题、副标题、控件文案和返回/取消/前进按钮文字。
+- `DynamicWelcomeWidgetCallback()`：设置自定义欢迎页的步骤名和版本化副标题。
+- `IntroductionPageCallback()`：把维护工具入口中文化为检查更新、管理安装和卸载，并说明各自真实行为。
+- `LicenseAgreementPageCallback()`：设置许可说明，强制 `AcceptLicenseCheckBox` 可见可用并保证正文最小高度；不能自动勾选或绕过许可。
+- `TargetDirectoryPageCallback()`：说明安装目录同时是用户数据相对根，并明确更新/默认卸载不覆盖 `event.csv`。
+- `ReadyForInstallationPageCallback()`：按安装、更新、管理安装或卸载生成确认摘要；选择删除数据时弹出不可撤销的第二次确认，拒绝时回到保留数据状态。
+- `PerformInstallationPageCallback()`、`FinishedPageCallback()`：按当前操作显示一致的进度和结果文本；安装完成页允许启动主程序，卸载完成页说明数据是否保留。
+- `DynamicUninstallOptionsWidgetCallback()`：设置动态卸载数据选择页的步骤标题。
+- `handleUninstallationFinished()`：仅当用户选择删除、完成二次确认且 IFW 发出成功卸载信号后调用系统 PowerShell 删除精确的 `[TargetDir]/data`；先校验安装目录非空且具有最小安全长度，失败时报告仍保留的数据路径，不把程序卸载成功等同于数据清理成功。
 
 脚本只做安装界面编排，数据判断全部交给 C++ 迁移器。
 
 #### `installer/packages/com.todoit.app/meta/package.xml.in` `[现有]`
 
-声明固定组件 ID `com.todoit.app` 的名称、版本/发布日期占位符、强制和关键组件属性、LGPLv3 许可页及 `installscript.qs`。打包脚本从根 CMake 读取版本并替换占位符。
+声明固定组件 ID `com.todoit.app` 的名称、版本/发布日期占位符、强制和关键组件属性、LGPLv3 许可页、`installscript.qs`，并用 `UserInterfaces` 预加载 `welcomewidget.ui` 与 `uninstalloptionswidget.ui`。打包脚本从根 CMake 读取版本并替换占位符。
 
 #### `installer/packages/com.todoit.app/meta/installscript.qs` `[现有]`
 
-- `Component()`：调用 `addStopProcessForUpdateRequest("ToDoIt.exe")`，避免更新运行中的主程序。
+- `Component()`：调用 `addStopProcessForUpdateRequest("ToDoIt.exe")`，避免更新运行中的主程序，并在组件加载后编排动态页面。
+- `componentLoaded()`：首次安装隐藏默认介绍、单组件选择和开始菜单页，插入高保真欢迎页；连接维护模式变化并同步卸载选项页，添加失败时恢复默认介绍页作为可用回退。
+- `maintenanceModeChanged()`、`syncUninstallOptionsPage()`：维护工具切换为卸载时才在准备页前加入卸载数据选择页，切回更新/管理时移除它，防止卸载专用选项泄漏到其他流程。
+- `keepDataToggled()`、`deleteDataToggled()`：把选择保存为安装器值，并在每次变更时清除旧的二次确认状态；默认始终保留数据。
 - `createOperations()`：先让 IFW 生成标准文件操作并创建应用/维护工具快捷方式；安装或更新的最后一个自定义操作执行新版本 `ToDoItMigrator`，非零退出码使维护事务失败。迁移器会恢复自己的数据备份，IFW 负责回滚此前包操作。
-- `data/` 从不进入组件归档，配置同时设置 `RemoveTargetDir=false`，默认卸载不拥有也不删除用户数据。
+- `data/` 从不进入组件归档，配置同时设置 `RemoveTargetDir=false`，默认卸载不拥有也不删除用户数据；显式永久删除由控制脚本在 IFW 成功卸载后单独执行。
+
+#### `welcomewidget.ui` `[现有]`
+
+Qt Designer/QUiLoader 动态页面，包含品牌标志、由 `@TODOIT_VERSION@` 替换的欢迎标题、三张功能卡和数据不覆盖提示。只允许调整布局与非承诺性说明，不得把功能卡当作可点击操作或在页面里读写数据。
+
+#### `uninstalloptionswidget.ui` `[现有]`
+
+Qt Designer/QUiLoader 动态页面，包含默认选中的保留数据单选项、永久删除单选项和红色不可撤销警告。页面本身只提交选择，不执行删除；删除路径校验、二次确认和失败反馈必须继续留在控制脚本。
 
 #### `installer/update/` `[现有]`
 
@@ -1232,9 +1269,13 @@ QWindowKit 1.5.0 源码固定快照，Apache-2.0。仅构建 Core 与 Quick；�
 
 首个不可回写历史发布清单，声明应用 0.1.0、事件架构 1、设置架构 1、完整 13 列字段顺序/缺省值、空迁移链和初始程序构成。已发布清单必须永久保留，不得被后续版本回写。
 
-#### `updater/manifests/0.2.0.json` `[现有当前发布]`
+#### `updater/manifests/0.2.0.json` `[现有历史发布]`
 
-声明当前应用 0.2.0，继续使用事件架构 1、设置架构 1 和与 0.1.0 相同的完整 13 列字段顺序/缺省值，因此迁移链仍为空；`programChanges` 记录 CSV 页面接入、层级拖放、文件夹附件、选择区富文本、石墨界面改进、圆角裁剪，以及移除内置示例和液态主题。本文件与版本标签对应，发布后不可回写。未来提高架构号时必须保留仍支持的旧结构、增加目标结构和连续迁移声明，并更新正式仓储及历史 fixture，不能只修改架构数字。
+声明应用 0.2.0，继续使用事件架构 1、设置架构 1 和与 0.1.0 相同的完整 13 列字段顺序/缺省值，因此迁移链仍为空；`programChanges` 记录 CSV 页面接入、层级拖放、文件夹附件、选择区富文本、石墨界面改进、圆角裁剪，以及移除内置示例和液态主题。本文件与版本标签对应，作为历史发布永久保留且不可回写。
+
+#### `updater/manifests/0.2.1.json` `[现有当前发布]`
+
+声明当前应用 0.2.1，继续使用事件架构 1、设置架构 1 和相同的 13 列字段/缺省值，因此迁移链仍为空；`programChanges` 记录统一安装器 UI、卸载数据选择、运行时完整性门禁，以及把 Qt DLL 与主程序部署到同一目录。未来提高架构号时必须保留仍支持的旧结构、增加目标结构和连续迁移声明，并更新正式仓储及历史 fixture，不能只修改架构数字。
 
 ## 11. 开发脚本
 
@@ -1244,7 +1285,7 @@ QWindowKit 1.5.0 源码固定快照，Apache-2.0。仅构建 Core 与 Quick；�
 - `scripts/build.ps1` `[现有]`：参数 `Preset`、`CMakePath`、`Parallel`、`Target` 与 `VisualStudioInstallPath`；导入 MSVC 后从项目根调用 `cmake --build --preset`，按需追加并行度或单一目标（例如 `all_qmllint`），失败原样传播。
 - `scripts/test.ps1` `[现有]`：参数 `Preset`、`CTestPath` 与 `Parallel`；验证 Qt 自带 CTest 后从项目根调用 `ctest --preset` 并原样传播失败。测试预设本身为进程提供 Qt DLL 路径，无需编译器环境。本阶段 QML lint 由 `build.ps1 -Target all_qmllint` 执行，Sanitizer 尚未集成。
 - `scripts/run.ps1` `[现有]`：参数 `Preset` 与 `QtBinPath`；验证 `build/<preset>/bin/ToDoIt.exe` 和 Qt bin 后，只为当前进程前置 Qt 路径；若项目根 `data/event.csv` 存在，再为子进程设置 `TODOIT_EVENT_FILE` 并同步启动程序。运行无需导入 MSVC 开发环境；脚本不运行 `windeployqt`，也不改变持久 PATH 或用户数据。
-- `scripts/package.ps1` `[现有]`：参数为 `Preset`、`CMakePath`、可选 `IfwRoot`/`RepositoryUrl` 和必填 `QtLicenseFile`。它先确认 Release 主程序、迁移器、版本清单与许可文件存在，HTTPS 校验可选仓库地址，再把受根目录边界保护的 `out/package-work` 作为唯一可清理临时目录；执行 `cmake --install` 而不构建，为部署载荷生成逐文件大小/SHA-256 `release-files.json`，填充 IFW XML 模板。传入仓库地址时调用 `binarycreator --hybrid`，否则使用 `--offline-only`；随后调用 `repogen`，输出首次安装 EXE、离线更新 ZIP、在线仓库 ZIP、清单、发布元数据和覆盖这些附件的 `SHA256SUMS.txt` 到 `out/packages/`，失败直接终止。
+- `scripts/package.ps1` `[现有]`：参数为 `Preset`、`CMakePath`、可选 `IfwRoot`/`RepositoryUrl` 和必填 `QtLicenseFile`。它先确认 Release 主程序、迁移器、版本清单与许可文件存在，HTTPS 校验可选仓库地址，再把受根目录边界保护的 `out/package-work` 作为唯一可清理临时目录；执行 `cmake --install` 而不构建，然后验证安装根的 EXE、清单、`qt.conf`、核心 Qt DLL、`qwindows.dll` 与 Qt Quick Controls 插件，并拒绝 `bin/Qt6Core.dll` 所代表的错误加载布局。通过后才生成逐文件大小/SHA-256 `release-files.json`，填充 IFW XML/控制脚本/欢迎页版本模板并复制 QSS 与卸载页。传入仓库地址时调用 `binarycreator --hybrid`，否则使用 `--offline-only`；随后调用 `repogen`，输出首次安装 EXE、离线更新 ZIP、在线仓库 ZIP、清单、发布元数据和覆盖这些附件的 `SHA256SUMS.txt` 到 `out/packages/`，失败直接终止。
 - `scripts/prepare-github-release.ps1` `[现有]`：必填 `Owner` 与 `Repository`，从 `publish-metadata.json` 读取并校验三段版本，限制 GitHub 标识字符，要求固化地址精确等于 `https://OWNER.github.io/REPOSITORY/updates/windows/x64`，并在复制前逐个核对 `SHA256SUMS.txt`；只在项目 `out/github-publish/v<version>/` 内清理和重建内容，将安装器、两类仓库 ZIP、清单、元数据及哈希复制到 `release-assets/`，把在线仓库解压到 `pages/updates/windows/x64/` 并生成 `.nojekyll`。脚本不调用 Git、GitHub API 或网络上传。
 
 脚本可编辑工具参数和步骤，不得重新实现 CSV 迁移、事件验证或备份算法。
@@ -1307,6 +1348,10 @@ QWindowKit 1.5.0 源码固定快照，Apache-2.0。仅构建 Core 与 Quick；�
 ├─ ToDoIt.exe
 ├─ ToDoItMigrator.exe
 ├─ ToDoItMaintenanceTool.exe
+├─ qt.conf                       Qt 插件/QML 相对路径入口
+├─ Qt6*.dll                      与主程序同目录的动态运行库
+├─ plugins/platforms/qwindows.dll
+├─ qml/                          Qt Quick 运行时模块与插件
 ├─ release-manifest.json          当前发布/数据架构清单
 ├─ release-files.json             程序文件大小与 SHA-256
 ├─ assets/                         发行默认资源
@@ -1339,12 +1384,12 @@ QWindowKit 1.5.0 源码固定快照，Apache-2.0。仅构建 Core 与 Quick；�
 
 ## 15. 当前实现状态
 
-当前发布目标为 0.2.0，事件与设置架构仍为 v1，不触发字段迁移。当前已完成：Domain/Application/Infrastructure/WindowsPlatform/Presentation 分层 target；进程级 `AppShell`、`EventData` 与 `RichTextFormatter` QML 单例入口；`EventRecord`、完整快照读写仓储端口、安装路径解析、UTF-8 BOM/RFC 4180 CSV 解析、13 列事件反序列化、树关系校验和 `QSaveFile` 原子序列化；依据最终设计稿实现的高保真主页面；集中主题、尺寸、排版、图标和动效令牌；VS Code 任务与 Qt Creator/Qt Design Studio 共用的 MSVC + Ninja 预设；配置/构建/指定目标/QML 检查/测试/运行脚本；Release CMake Install/Qt QML 部署、Qt IFW 混合/纯离线安装模板、GitHub Pages 在线仓库与离线更新包整理脚本、版本化字段清单、按稳定字段名通用迁移、显式删除字段门禁、迁移锁/永久备份/候选校验/原子替换/失败恢复/SHA-256/更新历史，以及应用壳和更新协调器两项 Qt Test 源码；共享/本机预设、默认资源路径模板、目录契约、需求基线和本开发手册。
+当前发布目标为 0.2.1，事件与设置架构仍为 v1，不触发字段迁移。当前已完成：Domain/Application/Infrastructure/WindowsPlatform/Presentation 分层 target；进程级 `AppShell`、`EventData` 与 `RichTextFormatter` QML 单例入口；`EventRecord`、完整快照读写仓储端口、安装路径解析、UTF-8 BOM/RFC 4180 CSV 解析、13 列事件反序列化、树关系校验和 `QSaveFile` 原子序列化；依据最终设计稿实现的高保真主页面；集中主题、尺寸、排版、图标和动效令牌；VS Code 任务与 Qt Creator/Qt Design Studio 共用的 MSVC + Ninja 预设；配置/构建/指定目标/QML 检查/测试/运行脚本；Release CMake Install/Qt QML 部署、统一石墨 Qt IFW 混合/纯离线安装器、动态欢迎/卸载数据页面、GitHub Pages 在线仓库与离线更新包整理脚本、版本化字段清单、按稳定字段名通用迁移、显式删除字段门禁、迁移锁/永久备份/候选校验/原子替换/失败恢复/SHA-256/更新历史，以及应用壳和更新协调器两项 Qt Test 源码；共享/本机预设、默认资源路径模板、目录契约、需求基线和本开发手册。
 
 当前主页面已经显示无外框顶层菜单栏、可替换 SVG Logo、窗口按钮、四边四角鼠标缩放、只在移动超过系统阈值后启动的标题栏拖动、460 px 搜索、延后判断的页面级点击外部失焦、带页面模糊与石墨遮罩的统一高层弹层、等高信息栏、紧凑排序表头、层级事项卡、独立字段框、重要度、可编辑状态、固定数字槽时间、直接子项比例、220 ms 平滑且目标锁定的单一备注区域、覆盖滚动视口完整高度的 9 px 主题滚动条、统一文件/目录附件浏览器，以及同时显示 20 px 加号图片和“添加事项”文字的 34 px 添加入口。窗口底色与环境光使用单一圆角 alpha 蒙版整体裁剪，不再由矩形 `clip` 放任左上和右下的对角环境光进入透明角区。详情展开、切换和收起计时器会重新读取当前事项卡的真实悬停值，附件选择取消或短暂固定期结束也会统一重新判断收起条件，避免过期悬停 ID 造成备注偶发常驻。整张事项卡均可开始拖动，展开后命中范围同步覆盖附件和备注详情；拖动时显示跟随指针的浮动事项卡，只有 child 目标会整卡高亮并成为子事项，before/after 同级目标只显示对应边缘的 3 px 插入线；松开后真实卡片以约 260 ms 同时过渡缩进、宽度和位置。附件入口不再显示二级菜单；选择器支持多选、双击进入目录、无选择时添加当前目录并在关闭前固定备注区，已添加的文件和文件夹均双击打开。缩略图为 32 px，“附件”与缩略图顶部对齐；备注标题为 13 px、正文使用 15 px 独立字号，B 与 RGB/CMYK 调色盘只格式化当前选中文字；底部可复制提示右侧的“打赏一下”文字与箭头均无背景且不可点击，只有末尾圆角正方形图标按钮可打开可替换的打赏图片弹层。当前不加载液态玻璃材质，也不显示主题切换开关。
 
 当前事项已接通 `event.csv` 双向快照：启动时从可执行文件相对 `data/event.csv` 读取，开发启动可用 `TODOIT_EVENT_FILE` 覆盖；目标不存在时先原子创建父目录与表头-only 空文件，已有文件绝不覆盖。CSV 字段解码现保持输入 `QByteArray` 生命周期直到 `QString` 实体化，修复合法 v1 文件的 `schema_version` 偶发误判，并在真正版本不支持时显示期望值和原始值。严格加载失败时列表为空、底部显示文件/行/列诊断并锁止写回。有效字段编辑、备注格式、文件/文件夹附件关联/解绑及树拖放只标记待保存；文件夹沿用 `attachments_json` 绝对路径数组并保留目录结尾分隔符，无需数据架构迁移。单个 5 分钟计时器仅在确有修改时生成不含空草稿的完整快照，正常关闭前再次检查并只刷新未落盘修改。拖动整卡可成为目标子事项、插入同级前后或投放到添加入口移回一级，目标为自身后代时拒绝。正式运行期资源定位器、真实打赏二维码、右键删除事务、普通保存备份与恢复、完整富文本白名单净化、持续时间分钟刷新、普通文件系统缩略图和平台磨砂仍未接入。
 
-本次 CSV 解码、拖放反馈、软件图标预留和液态主题移除，以及此前 Release 安装、卸载、GitHub 在线/离线更新与字段迁移文件，均遵循用户的“只编辑文件”要求；没有重新配置、编译、运行、执行 QML lint、测试、CMake Install、调用 Qt IFW 或生成安装包。上述“已完成”只代表源码、脚本、模板与文档已经静态写入，不代表本次版本已经运行验证。
+本次 0.2.1 改动已把 Windows 安装 bindir 调整到主程序根目录，新增运行库/插件静态打包门禁、完整安装器 QSS、版本化欢迎页、卸载数据选择/二次确认/成功后清理、各模式中文状态和新版本清单；同时保留既有 GitHub 在线/离线更新与字段迁移事务。全部修改遵循用户的“只编辑文件”要求；只做了 XML/文件内容的静态检查，没有重新配置、编译、运行、执行 QML lint、测试、CMake Install、调用 Qt IFW 或生成安装包。上述“已完成”只代表源码、脚本、模板与文档已经静态写入，不代表 0.2.1 安装器已经运行验证。
 
 此前应用壳基线已使用 `D:/Qt/Tools/CMake_64/bin/cmake.exe` 3.30.5、`D:/Qt/Tools/Ninja/ninja.exe` 1.12.1、Qt 6.11.2 `msvc2022_64` Kit，以及 Visual Studio 18 Community 提供的 x64 MSVC 19.51.36256.0，以 `local-dev` 预设完成全新配置与 Debug 编译；当时 `all_qmllint` 零警告、CTest 1/1 通过，并完成 3 秒启动冒烟。该历史结果不覆盖本次未执行的 CSV 改动验证。MSVC 不提供 UBSan，本阶段也尚未建立独立 ASan 预设，因此不声称 Sanitizer 已通过；更换 Kit 后必须使用全新缓存并重新验证。

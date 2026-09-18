@@ -1,0 +1,40 @@
+{
+  "appVersion": "0.2.1",
+  "eventSchema": 1,
+  "settingsSchema": 1,
+  "eventSchemas": [
+    {
+      "version": 1,
+      "columns": [
+        { "name": "schema_version", "default": "1" },
+        { "name": "event_id", "default": "" },
+        { "name": "parent_id", "default": "" },
+        { "name": "sibling_order", "default": "0" },
+        { "name": "title", "default": "" },
+        { "name": "importance", "default": "5" },
+        { "name": "start_at", "default": "" },
+        { "name": "completed_at", "default": "" },
+        { "name": "status", "default": "" },
+        { "name": "note_html", "default": "" },
+        { "name": "attachments_json", "default": "[]" },
+        { "name": "created_at", "default": "" },
+        { "name": "updated_at", "default": "" }
+      ]
+    }
+  ],
+  "eventMigrations": [],
+  "programChanges": {
+    "summary": "Installer recovery release with a unified graphite interface and complete Qt runtime deployment",
+    "added": [
+      "Graphite Qt IFW styling for installation, maintenance, update, uninstall, progress, and error states",
+      "Explicit uninstall choice for retaining or permanently removing user data",
+      "Release packaging checks for co-located Qt runtime libraries, platform plugins, and QML modules"
+    ],
+    "changed": [
+      "Installed Qt runtime libraries beside ToDoIt.exe so a clean Windows machine can start the application",
+      "Localized installer page titles, guidance, buttons, license acceptance, and completion messages",
+      "Expanded the installer window and page list to match the approved compact graphite design"
+    ],
+    "removed": []
+  }
+}

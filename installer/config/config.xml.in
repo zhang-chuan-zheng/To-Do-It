@@ -15,8 +15,12 @@
     <SaveDefaultRepositories>true</SaveDefaultRepositories>
     <AllowRepositoriesForOfflineInstaller>true</AllowRepositoriesForOfflineInstaller>
 @TODOIT_REMOTE_REPOSITORIES@
-    <WizardDefaultWidth>760</WizardDefaultWidth>
-    <WizardDefaultHeight>540</WizardDefaultHeight>
+    <WizardStyle>Classic</WizardStyle>
+    <WizardShowPageList>true</WizardShowPageList>
+    <StyleSheet>style.qss</StyleSheet>
+    <TitleColor>#F2F5F8</TitleColor>
+    <WizardDefaultWidth>1120</WizardDefaultWidth>
+    <WizardDefaultHeight>720</WizardDefaultHeight>
     <RunProgram>@TargetDir@/ToDoIt.exe</RunProgram>
     <RunProgramDescription>启动 To Do It</RunProgramDescription>
     <ControlScript>installer-controller.qs</ControlScript>
