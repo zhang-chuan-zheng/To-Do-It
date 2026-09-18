@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>WelcomeWidget</class>
+ <widget class="QWidget" name="WelcomeWidget">
+  <property name="minimumSize">
+   <size><width>700</width><height>470</height></size>
+  </property>
+  <property name="windowTitle"><string>欢迎</string></property>
+  <layout class="QVBoxLayout" name="WelcomeLayout">
+   <property name="leftMargin"><number>42</number></property>
+   <property name="topMargin"><number>34</number></property>
+   <property name="rightMargin"><number>42</number></property>
+   <property name="bottomMargin"><number>24</number></property>
+   <property name="spacing"><number>16</number></property>
+   <item>
+    <layout class="QHBoxLayout" name="BrandLayout">
+     <property name="spacing"><number>18</number></property>
+     <item><widget class="QLabel" name="BrandMark"><property name="text"><string>✓</string></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+     <item>
+      <layout class="QVBoxLayout" name="HeadingLayout">
+       <property name="spacing"><number>4</number></property>
+       <item><widget class="QLabel" name="WelcomeTitle"><property name="text"><string>欢迎安装 To Do It @TODOIT_VERSION@</string></property></widget></item>
+       <item><widget class="QLabel" name="WelcomeSubtitle"><property name="text"><string>一款离线优先的 Windows 桌面任务清单</string></property></widget></item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item><spacer name="HeadingSpacer"><property name="orientation"><enum>Qt::Vertical</enum></property><property name="sizeHint" stdset="0"><size><width>20</width><height>14</height></size></property></spacer></item>
+   <item>
+    <widget class="QFrame" name="LocalDataCard">
+     <property name="minimumSize"><size><width>0</width><height>76</height></size></property>
+     <layout class="QHBoxLayout" name="LocalDataLayout"><property name="leftMargin"><number>18</number></property><property name="rightMargin"><number>18</number></property><property name="spacing"><number>18</number></property>
+      <item><widget class="QLabel" name="LocalDataIcon"><property name="text"><string>▤</string></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+      <item><layout class="QVBoxLayout" name="LocalDataText"><property name="spacing"><number>2</number></property><item><widget class="QLabel" name="LocalDataTitle"><property name="text"><string>本地保存</string></property></widget></item><item><widget class="QLabel" name="LocalDataDescription"><property name="text"><string>事项和设置仅保存在您选择的安装目录</string></property></widget></item></layout></item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="TreeCard">
+     <property name="minimumSize"><size><width>0</width><height>76</height></size></property>
+     <layout class="QHBoxLayout" name="TreeLayout"><property name="leftMargin"><number>18</number></property><property name="rightMargin"><number>18</number></property><property name="spacing"><number>18</number></property>
+      <item><widget class="QLabel" name="TreeIcon"><property name="text"><string>≡</string></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+      <item><layout class="QVBoxLayout" name="TreeText"><property name="spacing"><number>2</number></property><item><widget class="QLabel" name="TreeTitle"><property name="text"><string>支持分级事项</string></property></widget></item><item><widget class="QLabel" name="TreeDescription"><property name="text"><string>用父子层级整理复杂任务，并保留备注与附件关联</string></property></widget></item></layout></item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="UpdateCard">
+     <property name="minimumSize"><size><width>0</width><height>76</height></size></property>
+     <layout class="QHBoxLayout" name="UpdateLayout"><property name="leftMargin"><number>18</number></property><property name="rightMargin"><number>18</number></property><property name="spacing"><number>18</number></property>
+      <item><widget class="QLabel" name="UpdateIcon"><property name="text"><string>◇</string></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+      <item><layout class="QVBoxLayout" name="UpdateText"><property name="spacing"><number>2</number></property><item><widget class="QLabel" name="UpdateTitle"><property name="text"><string>安全更新</string></property></widget></item><item><widget class="QLabel" name="UpdateDescription"><property name="text"><string>更新前校验数据结构；需要时先备份，再按稳定字段迁移</string></property></widget></item></layout></item>
+     </layout>
+    </widget>
+   </item>
+   <item><spacer name="BottomSpacer"><property name="orientation"><enum>Qt::Vertical</enum></property><property name="sizeHint" stdset="0"><size><width>20</width><height>18</height></size></property></spacer></item>
+   <item><widget class="QLabel" name="SupportingText"><property name="text"><string>ⓘ  安装与更新不会覆盖已有的 data/event.csv</string></property></widget></item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

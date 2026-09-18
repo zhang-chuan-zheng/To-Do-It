@@ -1,12 +1,21 @@
 cmake_minimum_required(VERSION 3.24)
 
 project(ToDoIt
-    VERSION 0.2.0
+    VERSION 0.2.1
     DESCRIPTION "Offline Windows task list application"
     LANGUAGES CXX
 )
 
 include(GNUInstallDirs)
+
+# The Windows executable and the Qt runtime must share one directory.  Qt's
+# deploy script derives QT_DEPLOY_BIN_DIR while Qt6 is discovered, so set the
+# install bindir before find_package(Qt6).  Keeping the executable in the
+# installation root also preserves the paths used by Qt IFW shortcuts and the
+# maintenance tool.
+if(WIN32)
+    set(CMAKE_INSTALL_BINDIR ".")
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

@@ -2,7 +2,7 @@
 
 本文是当前发布链路的操作手册。工程采用 Qt Installer Framework（Qt IFW）：首次安装使用包含应用载荷的混合安装器，安装目录中的 `ToDoItMaintenanceTool.exe` 同时承担在线更新、离线更新和卸载。GitHub Releases 保存面向用户的下载附件，GitHub Pages 保存维护工具可读取的 Qt IFW 更新仓库。
 
-当前待发布应用版本为 0.2.0，`eventSchema=1`、`settingsSchema=1`。历史 `updater/manifests/0.1.0.json` 必须保留且不可覆盖；本次使用新增的 `updater/manifests/0.2.0.json`。
+当前待发布应用版本为 0.2.1，`eventSchema=1`、`settingsSchema=1`。历史 `updater/manifests/0.1.0.json` 与 `0.2.0.json` 必须保留且不可覆盖；本次使用新增的 `updater/manifests/0.2.1.json`。该补丁版本修复 0.2.0 安装器界面和 Qt 动态库目录错误，不改变事件字段结构。
 
 发布脚本不会编译源码，也不会上传 GitHub。开发者必须先自行完成 Release 构建和验证，再运行脚本整理发布物。
 
@@ -17,7 +17,7 @@
 - `publish-metadata.json`：本次打包版本、事件架构、固化的更新地址和安装器模式。
 - `SHA256SUMS.txt`：上述发布文件的 SHA-256 校验值。
 
-安装和更新载荷不包含 `[InstallDir]/data/`。`event.csv`、用户配置、迁移备份和更新日志不上传 GitHub，也不属于安装组件。默认卸载只移除程序组件并保留 `data/`；用户仍可在备份后手工删除遗留数据。
+安装和更新载荷不包含 `[InstallDir]/data/`。`event.csv`、用户配置、迁移备份和更新日志不上传 GitHub，也不属于安装组件。卸载页默认选择“保留我的数据”；只有用户主动选择“同时删除所有用户数据”并通过二次确认后，维护工具才在成功卸载程序后清理 `data/`。
 
 ## 2. 一次性准备
 
@@ -134,7 +134,7 @@ $UpdateUrl = "https://OWNER.github.io/REPOSITORY/updates/windows/x64"
 
 若省略 `-IfwRoot`，脚本会在 `D:\Qt\Tools` 下查找 `binarycreator.exe`。若省略 `-RepositoryUrl`，脚本只生成不固化网络地址的纯离线安装器；用于 GitHub 在线更新的正式发行版必须传入 HTTPS 地址。
 
-脚本不会调用 `cmake --build`。它验证现有 Release 二进制和版本清单，执行 CMake Install/Qt 部署，生成 Qt IFW 混合安装器、在线仓库、离线更新包、发布元数据及 SHA-256。输出位于 `out/packages/`。
+脚本不会调用 `cmake --build`。它验证现有 Release 二进制和版本清单，执行 CMake Install/Qt 部署，然后要求 `ToDoIt.exe`、`ToDoItMigrator.exe`、`qt.conf` 和核心 `Qt6*.dll` 位于暂存根目录，同时验证 `plugins/platforms/qwindows.dll` 与 Qt Quick Controls QML 插件；发现 Qt DLL 被部署到相邻 `bin/` 时直接拒绝打包。通过门禁后才生成 Qt IFW 混合安装器、在线仓库、离线更新包、发布元数据及 SHA-256。输出位于 `out/packages/`。
 
 接着整理 GitHub 文件：
 
@@ -159,7 +159,7 @@ $UpdateUrl = "https://OWNER.github.io/REPOSITORY/updates/windows/x64"
 git init
 git branch -M main
 git add .
-git commit -m "chore: prepare To Do It v0.2.0"
+git commit -m "chore: prepare To Do It v0.2.1"
 git remote add origin https://github.com/OWNER/REPOSITORY.git
 git push -u origin main
 ```
@@ -167,9 +167,9 @@ git push -u origin main
 提交前用 `git status` 确认没有 `build/`、`out/`、`data/event.csv`、Qt SDK、许可证私有工作目录或本机预设。以后每次发布先在 `main` 完成代码审查和测试，再创建不可复用的版本标签：
 
 ```powershell
-git tag -a v0.2.0 -m "To Do It 0.2.0"
+git tag -a v0.2.1 -m "To Do It 0.2.1"
 git push origin main
-git push origin v0.2.0
+git push origin v0.2.1
 ```
 
 ## 8. 发布 GitHub Pages 更新仓库
@@ -200,7 +200,7 @@ https://OWNER.github.io/REPOSITORY/updates/windows/x64/Updates.xml
 
 ### 10.1 首次安装
 
-用户双击 `ToDoIt-Setup-<version>-x64.exe`，接受许可证并选择安装目录。默认目录为 `%LocalAppData%\Programs\ToDoIt`。安装器包含当前版本，不要求联网；首次启动仅在 `[InstallDir]/data/event.csv` 不存在时创建正式空表头。
+用户双击 `ToDoIt-Setup-<version>-x64.exe`，依次经过欢迎、许可协议、安装位置、准备、进度和完成页。许可协议同意框必须勾选后才能继续。默认目录为 `%LocalAppData%\Programs\ToDoIt`，也允许用户选择其他目录。安装器包含当前版本，不要求联网；首次启动仅在 `[InstallDir]/data/event.csv` 不存在时创建正式空表头。
 
 ### 10.2 在线更新
 
@@ -231,7 +231,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\apply-update.ps1 `
 & "$env:LOCALAPPDATA\Programs\ToDoIt\ToDoItMaintenanceTool.exe" purge
 ```
 
-默认卸载保留 `[InstallDir]/data/`。重新安装到同一目录后会继续读取旧数据，并在需要时迁移；若用户要彻底删除，应先备份，再手工删除保留目录。
+维护工具进入卸载时先显示数据处理页：默认“保留我的数据”，重新安装到同一目录后继续读取并在需要时迁移；选择“同时删除所有用户数据”会再次弹出不可撤销确认，只有确认且程序卸载成功后才删除 `[InstallDir]/data/`。清理失败时安装器必须显示实际保留路径，不能把程序卸载成功误报为数据也已删除。
 
 ## 11. 每次发布的强制检查清单
 
@@ -244,6 +244,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\apply-update.ps1 `
 - [ ] GitHub Pages 的 `Updates.xml` 及所有引用归档可下载；
 - [ ] Release 附件齐全且 SHA-256 一致；
 - [ ] Qt 动态链接，许可证与第三方通知齐全，未打包 SDK、头文件、编译器或调试文件；
+- [ ] `ToDoIt.exe`、`qt.conf` 与 `Qt6Core.dll` 等运行库同目录，`qwindows.dll` 和必需 QML 插件路径完整，暂存根下不存在错误的 `bin/Qt6Core.dll`；
 - [ ] 在干净 Windows 10/11 验证安装、启动、在线/离线更新和卸载；
 - [ ] 正式发布前完成可信代码签名和恶意软件扫描。
 

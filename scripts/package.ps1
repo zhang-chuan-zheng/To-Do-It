@@ -158,10 +158,32 @@ if ($LASTEXITCODE -ne 0) {
     throw "CMake install/deployment failed with exit code $LASTEXITCODE."
 }
 
-foreach ($requiredName in @('ToDoIt.exe', 'ToDoItMigrator.exe', 'release-manifest.json')) {
-    if (-not (Test-Path -LiteralPath (Join-Path $stageRoot $requiredName) -PathType Leaf)) {
-        throw "The staged release is incomplete: $requiredName is missing."
+foreach ($requiredRelativePath in @(
+    'ToDoIt.exe',
+    'ToDoItMigrator.exe',
+    'release-manifest.json',
+    'qt.conf',
+    'Qt6Core.dll',
+    'Qt6Gui.dll',
+    'Qt6Qml.dll',
+    'Qt6Quick.dll',
+    'Qt6QuickControls2.dll',
+    'Qt6QuickEffects.dll',
+    'plugins/platforms/qwindows.dll',
+    'qml/QtQuick/qmldir',
+    'qml/QtQuick/Controls/qtquickcontrols2plugin.dll'
+)) {
+    if (-not (Test-Path -LiteralPath (Join-Path $stageRoot $requiredRelativePath) -PathType Leaf)) {
+        throw "The staged release is incomplete: $requiredRelativePath is missing."
     }
+}
+
+# Windows resolves ordinary dependent DLLs beside the executable. A previous
+# package put ToDoIt.exe in the installation root but Qt6*.dll in root/bin,
+# producing an installer that succeeded yet could not launch on a clean PC.
+$misplacedQtRuntime = Join-Path $stageRoot 'bin/Qt6Core.dll'
+if (Test-Path -LiteralPath $misplacedQtRuntime -PathType Leaf) {
+    throw 'Invalid Windows deployment layout: Qt runtime DLLs are under bin while ToDoIt.exe is in the install root.'
 }
 
 $releaseFiles = @(
@@ -205,12 +227,23 @@ Expand-Template `
     (Join-Path $projectRoot 'installer/packages/com.todoit.app/meta/package.xml.in') `
     (Join-Path $packageMeta 'package.xml') `
     $templateValues
-Copy-Item -LiteralPath `
+Expand-Template `
     (Join-Path $projectRoot 'installer/controller/installer-controller.qs') `
-    -Destination (Join-Path $configRoot 'installer-controller.qs')
+    (Join-Path $configRoot 'installer-controller.qs') `
+    $templateValues
+Copy-Item -LiteralPath `
+    (Join-Path $projectRoot 'installer/config/style.qss') `
+    -Destination (Join-Path $configRoot 'style.qss')
 Copy-Item -LiteralPath `
     (Join-Path $projectRoot 'installer/packages/com.todoit.app/meta/installscript.qs') `
     -Destination (Join-Path $packageMeta 'installscript.qs')
+Expand-Template `
+    (Join-Path $projectRoot 'installer/packages/com.todoit.app/meta/welcomewidget.ui') `
+    (Join-Path $packageMeta 'welcomewidget.ui') `
+    $templateValues
+Copy-Item -LiteralPath `
+    (Join-Path $projectRoot 'installer/packages/com.todoit.app/meta/uninstalloptionswidget.ui') `
+    -Destination (Join-Path $packageMeta 'uninstalloptionswidget.ui')
 Copy-Item -LiteralPath $QtLicenseFile `
     -Destination (Join-Path $packageMeta 'LGPL-3.0-only.txt')
 
