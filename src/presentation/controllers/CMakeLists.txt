@@ -3,6 +3,8 @@ add_library(todoit_presentation_controllers STATIC
     AppShellController.h
     EventDataController.cpp
     EventDataController.h
+    QuoteController.cpp
+    QuoteController.h
     RichTextFormatter.cpp
     RichTextFormatter.h
 )

@@ -6,6 +6,10 @@ project(ToDoIt
     LANGUAGES CXX
 )
 
+if(WIN32)
+    enable_language(RC)
+endif()
+
 include(GNUInstallDirs)
 
 # The Windows executable and the Qt runtime must share one directory.  Qt's

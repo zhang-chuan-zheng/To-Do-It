@@ -8,7 +8,8 @@ Item {
     property var hostWindow
     property string defaultHelpText: EventData.loadError.length > 0
         ? EventData.loadError : (EventData.saveError.length > 0
-            ? EventData.saveError : qsTr("将鼠标移到组件上可查看操作说明"))
+            ? EventData.saveError : (QuoteData.loadError.length > 0
+                ? QuoteData.loadError : qsTr("将鼠标移到组件上可查看操作说明")))
     property string helpText: defaultHelpText
     signal addEventRequested()
     signal statusFilterRequested(string status)
@@ -74,11 +75,14 @@ Item {
             summaryLabel: taskTree.summaryLabel
             matchedCount: taskTree.summaryMatchedCount
             totalCount: taskTree.totalSourceCount
+            quote: QuoteData.quote
+            quoteAuthor: QuoteData.author
             onFilterRequested: function(status) {
                 taskTree.setStatusFilter(status)
                 root.statusFilterRequested(status)
             }
             onHelpRequested: function(message) { root.showHelp(message) }
+            onQuoteRefreshRequested: QuoteData.refreshQuote()
         }
         GlassPanel {
             Layout.fillWidth: true

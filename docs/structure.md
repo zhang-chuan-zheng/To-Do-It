@@ -83,8 +83,10 @@ To Do It/
 │  ├─ logos/                                       [现有]
 │  │  ├─ README.md                                 [现有]
 │  │  ├─ default/README.md                         [现有]
+│  │  ├─ custom/README.md                          [现有]
 │  │  ├─ manifest.json                             [计划]
-│  │  └─ default/app.svg                           [现有]
+│  │  ├─ default/app.svg                           [现有]
+│  │  └─ default/app.ico                           [现有]
 │  ├─ quotes/                                      [现有]
 │  │  ├─ README.md                                 [现有]
 │  │  └─ philosophy_quotes.json                    [现有]
@@ -149,12 +151,17 @@ To Do It/
 │  │  └─ persistence/
 │  │     ├─ CsvCodec.{h,cpp}                       [现有只读解析]
 │  │     └─ CsvEventRepository.{h,cpp}             [现有原子读写仓储]
-│  ├─ platform/windows/CMakeLists.txt              [现有框架]
+│  ├─ platform/windows/
+│  │  ├─ CMakeLists.txt                            [现有静态库]
+│  │  ├─ NativeAttachmentDialog.{h,cpp}            [现有原生附件选择]
+│  │  ├─ README.md                                 [现有]
+│  │  └─ resources/ToDoIt.rc.in                    [现有]
 │  └─ presentation/
 │     ├─ controllers/
 │     │  ├─ CMakeLists.txt                         [现有]
 │     │  ├─ AppShellController.{h,cpp}             [现有]
 │     │  ├─ EventDataController.{h,cpp}            [现有读写视图适配]
+│     │  ├─ QuoteController.{h,cpp}                [现有离线名言控制器]
 │     │  └─ RichTextFormatter.{h,cpp}              [现有选择范围格式器]
 │     └─ qml/
 │        ├─ CMakeLists.txt                         [现有]
@@ -230,9 +237,10 @@ To Do It/
 | `assets/images/default/README.md` | 说明默认打赏图片只是占位资源，正式二维码必须经资源映射替换。 |
 | `assets/images/default/donation-qr-placeholder.svg` | 未配置正式二维码时显示的 256 px 占位图；不具备收款能力，可通过 `images.donationQr` 替换。 |
 | `assets/logos/README.md` | Logo 清单、默认/自定义根目录和回退规则。 |
-| `assets/logos/custom/README.md` | 预留开发期自定义软件图标目录，约定 `app.svg` 由 CMake 配置时优先打包、缺失时回退默认 Logo，并为后续 Windows 可执行文件和安装器预留 `app.ico`。 |
-| `assets/logos/default/README.md` | 登记发行回退 `app.svg`、稳定资源键，以及开发期和运行期自定义 Logo 不得覆盖默认资源的约束。 |
+| `assets/logos/custom/README.md` | 说明开发期自定义软件图标接口：`app.svg` 用于 QML/窗口，`app.ico` 用于 Windows EXE 与 Qt IFW 安装器；任一缺失时逐项回退默认文件，替换后必须重新配置。 |
+| `assets/logos/default/README.md` | 登记发行回退 `app.svg`、`app.ico`、各自用途及自定义资源不得覆盖默认文件的约束。 |
 | `assets/logos/default/app.svg` | To Do It 默认灰色圆角复选标志；当 `assets/logos/custom/app.svg` 不存在时打包为 `IconCatalog.appLogo` 的稳定资源。 |
+| `assets/logos/default/app.ico` | Windows 默认多尺寸应用图标；当自定义 ICO 不存在时，由 RC 写入 `ToDoIt.exe`，并由打包脚本复制为 Qt IFW 安装器图标。 |
 | `assets/quotes/README.md` | 本地名言数据的出处、长度与审核规则。 |
 | `assets/quotes/philosophy_quotes.json` | 版本化离线哲学名言库；当前包含 1000 条带作者、作品出处、篇章位置、文本类型、主题标签和核验状态的记录。 |
 | `assets/themes/README.md` | 主题令牌、渐变、颜色和背景资源边界。 |
@@ -247,7 +255,7 @@ To Do It/
 | `docs/release.md` | Release 构建前提、当前 0.2.1 发布目标、Qt IFW 混合安装器、GitHub Pages 在线仓库、GitHub Release、离线更新、安装运行库布局、卸载数据选择、版本/字段迁移规则和发布门禁。 |
 | `docs/structure.md` | 本程序开发手册自身；任何项目更改必须同步维护对应注释。 |
 | `installer/README.md` | CMake Install/Qt 部署到 Qt IFW 混合安装器、在线/离线仓库的边界，并规定更新不覆盖数据、迁移先备份校验、卸载默认保留数据。 |
-| `installer/config/config.xml.in` | Qt IFW 全局配置模板；定义每用户默认目录、维护工具、许可、本地仓库权限及可选远程仓库占位符，并固定 Classic 向导、左侧步骤列表、1120×720 基准窗口和 `style.qss`；版本和仓库 XML 由打包脚本替换。 |
+| `installer/config/config.xml.in` | Qt IFW 全局配置模板；定义每用户默认目录、维护工具、许可、本地仓库权限及可选远程仓库占位符，并固定 Classic 向导、左侧步骤列表、1120×720 基准窗口、`style.qss` 和无扩展名的 `todoit-installer` 图标键；版本和仓库 XML 由打包脚本替换。 |
 | `installer/config/style.qss` | 安装器唯一视觉主题；统一石墨背景、圆角卡片、青蓝主按钮、高对比度复选/单选框、文本框、许可正文、进度条、滚动条、列表、消息框和禁用状态。可编辑颜色/间距/控件状态，不得隐藏许可同意入口或用颜色掩盖错误。 |
 | `installer/controller/installer-controller.qs` | 安装控制脚本；从 `LOCALAPPDATA` 计算默认目录，中文化各阶段标题、说明和按钮，确保许可同意框可见，按安装/更新/管理/卸载切换摘要和完成信息，对永久删除数据执行二次确认，并仅在卸载成功信号后清理 `[InstallDir]/data`。 |
 | `installer/packages/com.todoit.app/meta/package.xml.in` | 应用组件元数据模板；声明版本、发布日期、强制/关键组件、LGPLv3 许可、组件脚本，以及欢迎页和卸载数据选择页两个动态 UI。 |
@@ -263,11 +271,11 @@ To Do It/
 | `scripts/build.ps1` | 导入 MSVC 后用指定 Build Preset 构建，可限制并行度或通过 `-Target` 构建单一目标；失败必须原样传播。 |
 | `scripts/test.ps1` | 用绝对 CTest 路径和指定 Test Preset 运行测试，可限制并行度；只可编辑测试编排，不得隐藏失败。 |
 | `scripts/run.ps1` | 在当前进程 PATH 前置 Qt MSVC 运行库目录，并在本地数据文件存在时为子进程设置 `TODOIT_EVENT_FILE` 后启动构建产物；不部署文件、不持久修改环境。 |
-| `scripts/package.ps1` | 不编译；部署已构建的 Release，要求主程序/迁移器/`qt.conf`/核心 Qt DLL 共处安装根并验证平台/QML 插件，拒绝 DLL 错落 `bin/` 的不可启动布局；填充 IFW XML、控制脚本和欢迎页版本，占用统一 QSS/卸载页，按是否传入 HTTPS 仓库地址生成混合或纯离线安装器，并产出在线仓库、离线更新 ZIP、发布清单/元数据及 SHA-256。 |
+| `scripts/package.ps1` | 不编译；部署已构建的 Release，要求主程序/迁移器/`qt.conf`/核心 Qt DLL 共处安装根并验证平台/QML 插件，拒绝 DLL 错落 `bin/` 的不可启动布局；从自定义或默认 `app.ico` 选择并复制 `todoit-installer.ico`，填充 IFW XML、控制脚本和欢迎页版本，装入统一 QSS/卸载页，按是否传入 HTTPS 仓库地址生成混合或纯离线安装器，并产出在线仓库、离线更新 ZIP、发布清单/元数据及 SHA-256。 |
 | `scripts/prepare-github-release.ps1` | 不联网；核对版本/GitHub 标识、安装器固化的 GitHub Pages 地址和附件 SHA-256，把精确版本的 Release 附件及可部署 Pages 目录整理到受项目根边界保护的 `out/github-publish/`。 |
-| `src/CMakeLists.txt` | 创建主程序目标、链接 Qt Quick/Controls/Effects，在同一作用域注册 QML 模块，并生成包含 `Qt.labs.folderlistmodel` 等扫描导入的 CMake Install Qt QML 自包含部署脚本。 |
+| `src/CMakeLists.txt` | 创建主程序目标、链接 Qt Quick/Controls/Effects 与 Windows 平台静态库，在同一作用域注册 QML 模块；Windows 下从自定义或默认 `app.ico` 配置 RC 并加入目标；同时生成扫描实际 QML 导入的 CMake Install Qt QML 自包含部署脚本。 |
 | `src/.qmlls.ini` | Qt/CMake 为 QML Language Server 生成的导入路径提示；由 `QT_QML_GENERATE_QMLLS_INI` 重建、已忽略，禁止手改。 |
-| `src/main.cpp` | 应用进程入口；解析安装目录或开发覆盖的数据路径，在栈上构造 CSV 仓储、事件数据控制器和富文本格式器，注册三个 QML 单例并加载根 QML；对象析构顺序保证控制器引用的仓储仍然存活。 |
+| `src/main.cpp` | 应用进程入口；设置运行期窗口图标，解析安装目录或开发覆盖的数据路径，在栈上构造 CSV 仓储、事件数据控制器、离线名言控制器、富文本格式器和原生附件选择器，注册 `AppShell`、`EventData`、`QuoteData`、`RichTextFormatter`、`AttachmentDialog` 五个 QML 单例并加载根 QML；对象析构顺序保证控制器引用的仓储仍然存活。 |
 | `src/application/CMakeLists.txt` | 定义 `ToDoIt::Application` 接口目标及其对领域层的单向依赖；业务用例出现后才可加入本层源文件。 |
 | `src/application/README.md` | 用例、端口、事务和应用服务依赖边界。 |
 | `src/application/port/IEventRepository.h` | 定义 `load()` 与 `save(snapshot)` 读写仓储端口，以及包含行列的加载错误和独立保存错误；接口只暴露领域快照，不泄漏 CSV/Qt 文件类型。 |
@@ -282,29 +290,33 @@ To Do It/
 | `src/infrastructure/persistence/CsvCodec.cpp` | 实现 UTF-8 BOM 检查和 RFC 4180 状态机，支持引号内逗号、双引号及换行并返回精确记录行号。 |
 | `src/infrastructure/persistence/CsvEventRepository.h` | 声明 `IEventRepository` 的文件型读写实现，集中公开当前 `supportedSchemaVersion` 和只读数据文件路径。 |
 | `src/infrastructure/persistence/CsvEventRepository.cpp` | 文件不存在时原子创建正式空表头；读取时保持每个字段的 UTF-8 源字节存活并立即实体化 `QString`，避免 Qt 惰性解码引用临时对象而误判合法 `schema_version=1`，随后严格反序列化 13 列并校验完整树；版本错误会同时报告期望值和原始值。保存时校验完整快照、编码附件 JSON 与 RFC 4180 字段，再用禁用直接回退的 `QSaveFile` 原子提交 UTF-8 BOM、表头和记录。 |
-| `src/platform/windows/CMakeLists.txt` | 定义 `ToDoIt::WindowsPlatform` 接口目标并依赖应用端口；只可加入 Windows 平台适配和必要系统库。 |
-| `src/platform/windows/README.md` | Windows 窗口、DWM、缩略图和文件打开能力边界。 |
-| `src/presentation/controllers/CMakeLists.txt` | 构建 `ToDoIt::PresentationControllers` 静态库、加入事件控制器与富文本格式器、注入项目版本；公开链接 Qt Core/Gui/应用层，私有链接 Qt Quick 以访问 `QQuickTextDocument`。 |
+| `src/platform/windows/CMakeLists.txt` | 构建 `ToDoIt::WindowsPlatform` 静态库，公开 Qt Core 和应用端口，Windows 下私有链接 `ole32`、`shell32`、`uuid`；只可加入 Windows 平台适配和必要系统库。 |
+| `src/platform/windows/NativeAttachmentDialog.h` | 声明 QML 可调用的 Windows 原生附件选择单例，公开只读 `lastError` 与同步 `chooseAttachments()`；返回条目仅包含文件 URL 和目录标志。 |
+| `src/platform/windows/NativeAttachmentDialog.cpp` | 使用 `IFileOpenDialog`、`IFileDialogCustomize` 和 RAII COM 初始化打开 Windows Shell 窗口；支持一次多选文件，并以内嵌“添加当前文件夹”按钮提交当前目录，取消不报错，系统失败写入中文 HRESULT 诊断。 |
+| `src/platform/windows/README.md` | Windows 窗口、DWM、缩略图、Shell 原生附件选择、文件打开及原生资源模板能力边界。 |
+| `src/platform/windows/resources/ToDoIt.rc.in` | Windows 资源模板；CMake 用所选 ICO 的规范路径替换占位符，RC 编译器把应用图标 ID 101 写入 `ToDoIt.exe`。 |
+| `src/presentation/controllers/CMakeLists.txt` | 构建 `ToDoIt::PresentationControllers` 静态库、加入应用壳、事件、名言控制器与富文本格式器、注入项目版本；公开链接 Qt Core/Gui/应用层，私有链接 Qt Quick 以访问 `QQuickTextDocument`。 |
 | `src/presentation/controllers/AppShellController.h` | 声明 QML 应用壳单例的四个只读属性；可编辑仅限进程级元数据/框架状态接口，不得加入事件业务。 |
 | `src/presentation/controllers/AppShellController.cpp` | 返回应用名、CMake 项目版本、阶段说明和框架就绪标志；可编辑属性实现，`backendReady` 不得冒充数据层就绪。 |
 | `src/presentation/controllers/EventDataController.h` | 声明供 QML 使用的启动事件、数据路径、加载/保存错误和加载状态属性，并提供 `createEventId()` 与 `saveEvents(rows)`；以 const 引用持有应用仓储端口。 |
 | `src/presentation/controllers/EventDataController.cpp` | 在领域事件与 QML 行之间转换，生成 UUID，保留创建时间，把本地显示时间/附件 URL 转回持久格式并调用完整快照原子保存；加载或保存失败时生成含路径的中文诊断。 |
+| `src/presentation/controllers/QuoteController.h` | 声明 `QuoteData` QML 单例的名言、作者、出处、加载诊断和可用数量属性，以及随机换句接口；公开状态只读。 |
+| `src/presentation/controllers/QuoteController.cpp` | 从嵌入资源读取并校验名言 JSON 的版本、声明数量与已核验记录；启动时随机选择，手动刷新避免连续重复，失败时保留诊断并使用内置回退文本。 |
 | `src/presentation/controllers/RichTextFormatter.h` | 声明选择范围富文本接口 `toggleBold()` 与 `applyColor()`；参数使用 QML 文本文档对象和选择起止位置，不暴露文档所有权。 |
 | `src/presentation/controllers/RichTextFormatter.cpp` | 通过 `QQuickTextDocument` 取得 Qt 文本文档，夹紧非空选择范围，并用 `QTextCursor` 编辑块仅合并所选字符的字重或前景色；无效文档、空选择或无效颜色返回失败。 |
-| `src/presentation/controllers/README.md` | C++ 控制器、视图模型及 QML 接口边界，说明事件快照读写和仅作用于选择范围的富文本格式职责。 |
-| `src/presentation/qml/CMakeLists.txt` | 注册 QML 模块、根页面、样式单例及全部主页面组件；配置时若存在 `assets/logos/custom/app.svg` 就优先把它映射为稳定 `icons/app.svg`，否则使用默认 Logo，并继续打包附件、文件夹、打赏、指示箭头图标和二维码占位图。停用的液态材质、开关和专用图标不再注册。 |
+| `src/presentation/controllers/README.md` | C++ 控制器、视图模型及 QML 接口边界，说明事件快照读写、离线名言随机选择和仅作用于选择范围的富文本格式职责。 |
+| `src/presentation/qml/CMakeLists.txt` | 注册 QML 模块、根页面、样式单例及全部主页面组件；配置时若存在 `assets/logos/custom/app.svg` 就优先把它映射为稳定 `icons/app.svg`，否则使用默认 Logo；同时把 1000 条名言 JSON 映射为 `content/philosophy_quotes.json`，并继续打包附件、文件夹、打赏、指示箭头图标和二维码占位图。停用的液态材质、开关和专用图标不再注册。 |
 | `src/presentation/qml/Main.qml` | 创建圆角无边框根窗口、石墨实色回退与低饱和环境光；将底色与三块环境光先渲染到隐藏的 `backgroundSource` 纹理，再由只启用遮罩的 `MultiEffect` 使用 `roundedWindowMask` 做真实圆角 alpha 裁剪，避免矩形 `clip` 使左上/右下装饰光泄漏成微小直角。装配 `MainPage` 和窗口缩放热区；仅将 `MainPage` 暴露为高层弹窗的应用内模糊快照源，并在正常关闭信号中同步刷新待保存事件。 |
-| `src/presentation/qml/pages/MainPage.qml` | 装配标题栏、信息栏、表头、事件列表和带打赏入口的帮助行；注入 CSV 事件与 UUID 工厂，转发快照给 `EventData.saveEvents()`，保存失败时保留脏标记并显示错误，区分文件/文件夹打开提示，同时协调页面级点击外部失焦。 |
+| `src/presentation/qml/pages/MainPage.qml` | 装配标题栏、信息栏、表头、事件列表和带打赏入口的帮助行；把 `QuoteData` 的随机正文/作者和换句接口接到信息栏，注入 CSV 事件与 UUID 工厂，转发快照给 `EventData.saveEvents()`，保存失败时保留脏标记并显示错误，区分文件/文件夹打开提示，同时协调页面级点击外部失焦。 |
 | `src/presentation/qml/components/AddEventButton.qml` | 34 px 单一新增事项入口，中央显示 20 px 独立 SVG 图标和“添加事项”文字，使用 `Item` 和指针处理器而非默认 `Button` 状态；发出 `addRequested()`，同时作为移回一级的拖放目标并发出 `rootDropRequested()`。 |
 | `src/presentation/qml/components/AppLogo.qml` | 暴露可替换 `source` 并默认使用 `IconCatalog.appLogo`；可编辑显示与回退外观，不得硬编码用户路径。 |
-| `src/presentation/qml/components/AttachmentPickerDialog.qml` | 应用内统一文件系统浏览器，基于 `FolderListModel` 同时列出文件与目录；单击切换多选、双击目录进入、无选择时添加当前目录，并在关闭时明确发出接受或取消信号。 |
 | `src/presentation/qml/components/AttachmentStrip.qml` | 绘制顶部对齐的“附件”、32 px 文件/文件夹附件小块和唯一末尾添加按钮；入口直接发出统一选择请求，不再弹出二级菜单；文件夹使用专用图标，文件与文件夹均双击打开，悬停显示完整路径和解除关联按钮。 |
 | `src/presentation/qml/components/BottomHelpBar.qml` | 以无外框单行可复制文字显示帮助消息和严重程度；右侧将无背景的“打赏一下”文字、无背景箭头与独立 24 px 圆角正方形打赏图标按钮并列，仅图标按钮可打开 `DonationPopup`；可编辑排版，消息优先级留给页面协调。 |
 | `src/presentation/qml/components/CompactDateEditor.qml` | 在独立字段框内提供无 Qt 输入掩码的固定 16 字符时间编辑器，自行维护 12 个数字槽，支持逐数字前进、自动越过分隔符、鼠标在分隔符前后原生定位、逐字符方向键以及数字位删除，并执行范围及闰年校验；公开 `text`、`allowEmpty`、`editing`、`invalidInput`、`valueEdited()` 和 `validationFailed()`。 |
 | `src/presentation/qml/components/EditableStatusComboBox.qml` | 可输入且可从已有状态选择的状态字段；公开 `statusText`、`statusOptions`、`editing`、`statusEdited()`，颜色仅表达状态，下拉层使用统一页面模糊和深色遮罩。 |
-| `src/presentation/qml/components/EventCard.qml` | 单个事项的完整圆角边界及整卡拖放/悬停命中区；只读 `pointerHovered` 将 `cardHover.hovered` 的实时值提供给事件树，防止详情动画期间缓存的悬停事件失效。`cardDrag.parent` 指向完整 `EventCard`，因此备注折叠时覆盖顶部事项行，展开后同时覆盖附件、备注工具栏、正文和详情空白。拖拽热点直接使用相对于整卡的 `centroid.pressPosition`，防止从详情区起拖时产生投放偏移。`childDropActive` 只在 `dropMode=child` 时让整卡显示强调背景和焦点边框；`ordinaryHoverActive` 只在没有投放模式时保留普通悬停效果，before/after 模式因此不会误亮整卡，只在相应边缘显示 3 px 插入线。拖动时把当前委托提升到列表顶层并在原位置保留低对比占位，`dragProxy` 显示含序号、名称和落位提示的浮动卡。 |
+| `src/presentation/qml/components/EventCard.qml` | 单个事项的完整圆角边界及整卡拖放/悬停命中区；只读 `pointerHovered` 将 `cardHover.hovered` 的实时值提供给事件树，统一 `editingLocked` 汇总名称、开始时间、完成时间、状态和备注（含调色盘）编辑状态，并通过 `editingStateChanged()` 通知全局排序协调器。详情整体展开/收起保留高度动画，但 `noteEditor.editing` 为真时禁用外卡高度动画，使连续换行或删除时正文与蓝色外框同步变化。`cardDrag.parent` 指向完整 `EventCard`，因此备注折叠时覆盖顶部事项行，展开后同时覆盖附件、备注工具栏、正文和详情空白。拖拽热点直接使用相对于整卡的 `centroid.pressPosition`，防止从详情区起拖时产生投放偏移。`childDropActive` 只在 `dropMode=child` 时让整卡显示强调背景和焦点边框；`ordinaryHoverActive` 只在没有投放模式时保留普通悬停效果，before/after 模式因此不会误亮整卡，只在相应边缘显示 3 px 插入线。拖动时把当前委托提升到列表顶层并在原位置保留低对比占位，`dragProxy` 显示含序号、名称和落位提示的浮动卡。 |
 | `src/presentation/qml/components/EventTableHeader.qml` | 绘制无子框的加高七列表头，以轻微纵向线标示列边界，紧凑排序箭头紧贴名称，并与列表共用滚动条槽和列宽；向事件树发送排序方向。 |
-| `src/presentation/qml/components/EventTreeView.qml` | 用 `initialEvents` 替换空源模型，不含内置事项；负责筛选、搜索、动画排序、UUID 草稿、时间、文件/文件夹附件和唯一备注。详情状态机通过 `isEventCardHovered()` 在展开、切换与收起计时器到期时重新读取当前委托的真实悬停状态，`scheduleDetailsCloseIfInactive()` 统一检查悬停、编辑和附件固定锁，`releasePinnedDetails()` 在附件选择取消或展示期结束后重新安排收起，避免缓存状态导致偶发常驻。协调统一附件浏览器并在其打开期间固定对应事项，将目录 URL 规范为以分隔符结尾，打开时区分类型；跟踪拖动目标模式，完成成为子项/同级移动/移回一级并拒绝后代投放，落下后保持同一委托并对 `x`、`width`、`y` 和轻微缩放执行约 260 ms 落位过渡；修改只标脏，5 分钟到期时仅在脏状态发出完整持久快照，关闭时再次检查并可强制刷新。 |
+| `src/presentation/qml/components/EventTreeView.qml` | 用 `initialEvents` 替换空源模型，不含内置事项；负责筛选、搜索、动画排序、UUID 草稿、时间、文件/文件夹附件和唯一备注。视口级空白点击命中检查排除事项卡与添加按钮，卡片间、按钮下方和空列表区域均可发出全局失焦请求。备注输入只写源模型，退出编辑后再同步可见模型，避免每个字符反向覆盖正在输入的 `TextArea`。开始/完成时间或状态提交后立即重算持续时间；单个 60 秒计时器只批量更新源模型和可见模型的显示字段，不重排、不标脏。持续时间排序生效时，开始/完成时间修改只先同步当前可见字段并建立待排序请求；`durationSortDelayTimer` 只有在所有事项的名称、时间、状态、备注等编辑器以及 Windows 原生附件选择器都连续空闲 500 ms 后，才按完整排序流水线执行一次动画重排。任一编辑器重新激活或任一字段再次提交修改都会停止并重置倒计时。详情状态机通过 `isEventCardHovered()` 在展开、切换与收起计时器到期时重新读取当前委托的真实悬停状态，`scheduleDetailsCloseIfInactive()` 统一检查悬停、编辑和附件固定锁，`releasePinnedDetails()` 在附件选择取消或展示期结束后重新安排收起，避免缓存状态导致偶发常驻。`requestAttachmentSelection()` 在同步调用 `AttachmentDialog.chooseAttachments()` 前固定事项并设置全局编辑门禁，返回后接收系统选择结果、显示平台错误或按取消路径解锁；目录 URL 规范为以分隔符结尾，打开时区分类型。跟踪拖动目标模式，完成成为子项/同级移动/移回一级并拒绝后代投放，落下后保持同一委托并对 `x`、`width`、`y` 和轻微缩放执行约 260 ms 落位过渡；修改只标脏，5 分钟到期时仅在脏状态发出完整持久快照，关闭时再次检查并可强制刷新。 |
 | `src/presentation/qml/components/ExpandableSearchBox.qml` | 搜索圆形锚点保持不动并向右展开至 460 px，条件选择后接垂直居中的输入框；普通悬停离开提供 800 ms 延迟，点击外部造成失焦且内容为空时由 `collapseImmediatelyIfIdle()` 立即收起，并继续发送实时查询信号。 |
 | `src/presentation/qml/components/FieldFrame.qml` | 事件原子字段共用的清晰细描边圆角容器；公开内边距、高亮和填充色，不持有字段数据。 |
 | `src/presentation/qml/components/FramelessTitleBar.qml` | 无外框顶层菜单栏，组合可替换 SVG Logo、名称、64 px 留距搜索和 SVG 窗口按钮；不再装配液态主题切换控件。`pointInsideSearch()` 为全局失焦逻辑排除搜索区域，普通按下仅发出 `backgroundPressed()`，移动超过系统拖动阈值后才调用 Qt Window 系统移动，避免单击遗留原生指针捕获。 |
@@ -312,8 +324,8 @@ To Do It/
 | `src/presentation/qml/components/GlassToolTip.qml` | 统一附件路径等悬停说明的自适应宽度弹层，使用主题字体、换行和应用内模糊背景。 |
 | `src/presentation/qml/components/ImportanceSelector.qml` | 五个等宽胶囊分段表示 1/3/5/7/9，点击按累计段选择等级；仅发出 `levelRequested()`，不显示数值。 |
 | `src/presentation/qml/components/IconImage.qml` | 统一加载 SVG/位图图标并提供可访问名称和最小文字回退；业务组件只绑定资源 URL，不再自行绘制符号。 |
-| `src/presentation/qml/components/InfoFilterBar.qml` | 名言占据左侧弹性区域，右侧放置彼此独立的筛选框和统计框；公开动态筛选选项、统计标签和计数 alias，不自行遍历事件。 |
-| `src/presentation/qml/components/QuoteBanner.qml` | 将名言和作者保持在同一行，正常宽度不放大、缩窄时自适应减小；双击发出本地换句请求。 |
+| `src/presentation/qml/components/InfoFilterBar.qml` | 名人名言占据左侧弹性区域，右侧放置彼此独立的筛选框和统计框；公开名言/作者、动态筛选选项、统计标签和计数 alias，不自行遍历事件。 |
+| `src/presentation/qml/components/QuoteBanner.qml` | 将控制器提供的名言和作者保持在同一行，正常宽度不放大、缩窄时自适应减小；双击发出本地换句请求，不直接解析 JSON。 |
 | `src/presentation/qml/components/ColorPalettePopup.qml` | 与主界面一致的非模态调色盘；提供圆形预设色、紧凑居中的 RGB/CMYK 数值输入、双向换算和“应用到所选文字”，保持打开以连续格式化多个选区。 |
 | `src/presentation/qml/components/DonationPopup.qml` | 底部右侧的非模态打赏图片弹层；公开可替换 `qrSource`，使用当前主题玻璃背景、关闭按钮、图片等比显示和占位说明，不包含支付逻辑。 |
 | `src/presentation/qml/components/RichNoteEditor.qml` | 备注标题行右侧提供加粗按钮和 `palette.svg` 调色盘按钮；保存并恢复选择范围，调用 C++ 格式器只改变选中文字；正文高度跟随富文本 `contentHeight`，不使用内部滚动区域。 |
@@ -391,12 +403,13 @@ To Do It/
 主要逻辑：
 
 - `project(ToDoIt VERSION 0.2.1)`：当前唯一应用版本来源；发布时同步安装包版本。
+- Windows 配置显式启用 `RC` 语言，只用于编译应用图标等原生资源；非 Windows 配置不启用 RC。
 - Windows 在发现 Qt 前把 `CMAKE_INSTALL_BINDIR` 设为 `.`，使 `qt_generate_deploy_qml_app_script()` 把普通 Qt 运行库部署到 `ToDoIt.exe` 同目录；平台插件和 QML 导入仍分别位于 `plugins/`、`qml/`。
 - `CMAKE_CXX_STANDARD 20`：要求 C++20 且关闭编译器扩展。
 - `CMAKE_MSVC_RUNTIME_LIBRARY`：MSVC 使用动态运行库，Debug 对应 `/MDd`，Release 对应 `/MD`，与 Qt 官方 MSVC 二进制保持一致。
 - 三类输出目录：可执行文件和 DLL 放到 `build/<preset>/bin`，静态库/导入库放到 `build/<preset>/lib`。
 - `TODOIT_WARNINGS_AS_ERRORS`：开发/CI 可开启，普通首次配置默认关闭。
-- `find_package(Qt6 ...)`：主程序加载 `Quick`、`QuickControls2`、`QuickEffects`；统一附件浏览器使用 Qt Declarative 随附的 `Qt.labs.folderlistmodel` QML 模块，不再链接 `QuickDialogs2`；`BUILD_TESTING=ON` 时才额外加载 `Test`，避免发布目标无条件依赖测试模块。
+- `find_package(Qt6 ...)`：主程序加载 `Quick`、`QuickControls2`、`QuickEffects`；附件选择改用 Windows SDK Shell COM，不链接 Qt Widgets、`QuickDialogs2` 或 `Qt.labs.folderlistmodel`；`BUILD_TESTING=ON` 时才额外加载 `Test`，避免发布目标无条件依赖测试模块。
 - `todoit_fix_localized_msvc_dependencies()`：仅修正已知中文 MSVC/CMake 3.30 依赖前缀乱码，使 Ninja 能隐藏并追踪 `/showIncludes` 输出。
 - `add_subdirectory(...)`：先加入主程序，再加入不依赖 UI 的更新核心，最后在 CTest 开启时加入测试目标。
 - Release 安装规则：安装 `assets/`、默认资源模板、第三方声明和与项目版本同名的不可变更新清单；任何 `data/` 内容均不进入安装集。缺少版本清单时配置直接失败。
@@ -451,13 +464,13 @@ To Do It/
 
 记录窗口、排序、附件、删除、刷新、拖拽等功能图标。功能键名是代码契约，换图时只改路径；重命名键必须同步 QML 和测试。
 
-#### `assets/logos/custom/` `[现有预留目录]`
+#### `assets/logos/custom/` `[现有可选覆盖目录]`
 
-开发期软件图标放置位置。`app.svg` 存在时，`src/presentation/qml/CMakeLists.txt` 在配置阶段优先把它打包为稳定资源 `icons/app.svg`；缺失时逐文件回退 `assets/logos/default/app.svg`。`app.ico` 是后续 Windows EXE、安装器和卸载器资源脚本的预留文件名，当前尚未接线。目录中的 `README.md` 记录方形透明画布、多尺寸 ICO 和重新配置 CMake 的约束；新增真实图标后必须把文件自身补登记到本手册。
+开发期软件图标放置位置。`app.svg` 存在时，`src/presentation/qml/CMakeLists.txt` 在配置阶段优先把它打包为稳定资源 `icons/app.svg`；缺失时逐文件回退 `assets/logos/default/app.svg`。`app.ico` 存在时，`src/CMakeLists.txt` 通过 Windows RC 把它写入 `ToDoIt.exe`，`scripts/package.ps1` 同时复制它供 Qt IFW 安装器使用；缺失时两处都回退 `assets/logos/default/app.ico`。目录中的 `README.md` 记录方形透明 SVG、多尺寸 ICO 和重新配置 CMake 的约束；新增真实图标后必须把文件自身补登记到本手册。
 
-#### `assets/logos/default/*.svg`、`assets/icons/default/*.svg` 与 `assets/images/default/*.svg` `[现有]`
+#### `assets/logos/default/*`、`assets/icons/default/*.svg` 与 `assets/images/default/*.svg` `[现有]`
 
-`app.svg` 是默认灰色圆角复选标志；功能图标当前包括搜索、窗口控制、下拉、日期、排序、添加事项、附件添加、文件夹、调色盘、打赏入口及其右向指示箭头。所有控件图标均为小型 SVG，正式 QML 通过 `IconCatalog` 读取稳定 URL，不使用字体符号模拟图标。`donation-qr-placeholder.svg` 是独立图片资源，只在没有正式二维码时提示替换，不具备收款能力。`add.svg` 与 `attachment-add.svg` 分别服务两个添加入口；`calendar.svg` 已登记但当前时间编辑器不展示不可操作的按钮。此前试制的液态主题 Logo 与开关图标已删除且不再打包。
+`app.svg` 是 QML 默认灰色圆角复选标志，`app.ico` 是同一标志的 Windows 多尺寸回退文件；功能图标当前包括搜索、窗口控制、下拉、日期、排序、添加事项、附件添加、文件夹、调色盘、打赏入口及其右向指示箭头。所有控件图标均为小型 SVG，正式 QML 通过 `IconCatalog` 读取稳定 URL，不使用字体符号模拟图标。`donation-qr-placeholder.svg` 是独立图片资源，只在没有正式二维码时提示替换，不具备收款能力。`add.svg` 与 `attachment-add.svg` 分别服务两个添加入口；`calendar.svg` 已登记但当前时间编辑器不展示不可操作的按钮。此前试制的液态主题 Logo 与开关图标已删除且不再打包。
 
 可编辑内容：SVG 的路径、描边、填色和几何形状。文件名是资源契约；如需重命名，必须同时修改 `config/default-resources.json`、`IconCatalog.qml`、QML 资源清单及本开发手册。
 
@@ -555,7 +568,7 @@ D:/Microsoft Visual Studio/18/Community/
 
 ### `src/CMakeLists.txt` `[现有]`
 
-作用：先按依赖方向加入五个分层 target，再创建 `ToDoIt` 可执行目标，链接 Infrastructure、WindowsPlatform、PresentationControllers、Qt Quick/QuickControls2/QuickEffects，启用警告并定义 Windows GUI 属性；通过 `include(presentation/qml/CMakeLists.txt)` 在创建可执行目标的同一 CMake 目录作用域内调用 `qt_add_qml_module()`，确保 Qt 能正确执行元类型提取、QML 类型注册和目标终结。目标安装到发行根目录，`qt_generate_deploy_qml_app_script()` 让 `cmake --install` 自动收集 Qt DLL、平台插件和 QML 运行模块，包括 QML 导入扫描发现的 `Qt.labs.folderlistmodel`。
+作用：先按依赖方向加入五个分层 target，再创建 `ToDoIt` 可执行目标，链接 Infrastructure、WindowsPlatform、PresentationControllers、Qt Quick/QuickControls2/QuickEffects，启用警告并定义 Windows GUI 属性；Windows 下优先选择 `assets/logos/custom/app.ico`，否则回退默认 ICO，把规范路径填入 `platform/windows/resources/ToDoIt.rc.in` 后作为目标源码编译。通过 `include(presentation/qml/CMakeLists.txt)` 在创建可执行目标的同一 CMake 目录作用域内调用 `qt_add_qml_module()`，确保 Qt 能正确执行元类型提取、QML 类型注册和目标终结。目标安装到发行根目录，`qt_generate_deploy_qml_app_script()` 让 `cmake --install` 自动收集实际使用的 Qt DLL、平台插件和 QML 运行模块。
 
 可编辑内容：目标自己的源文件、私有链接库、所包含的模块清单和安装规则。禁止添加全局编译选项或个人路径；可执行目标作为 QML 模块 backing target 时，不得把其 `qt_add_qml_module()` 改回子目录作用域中的 `add_subdirectory()` 调用。
 
@@ -571,11 +584,11 @@ D:/Microsoft Visual Studio/18/Community/
 
 当前逻辑顺序：
 
-1. 构造 `QGuiApplication` 并设置应用/组织名称；
+1. 构造 `QGuiApplication`，设置应用/组织名称，并以稳定资源 `icons/app.svg` 设置运行期窗口图标；
 2. 在栈上构造 `AppShellController`，把 CMake 项目版本同步到 Qt 应用元数据；
 3. 用 `QCoreApplication::applicationDirPath()` 构造 `InstallPaths`，默认得到 `[可执行文件目录]/data/event.csv`；仅当进程提供 `TODOIT_EVENT_FILE` 时改用该开发/诊断覆盖路径；
 4. 构造 `CsvEventRepository`，同步执行一次 `load()`，并把仓储引用、结果与实际路径交给进程级 `EventDataController`；仓储先构造、后析构，覆盖控制器整个引用期；
-5. 在栈上构造 `RichTextFormatter`，使用 `qmlRegisterSingletonInstance()` 在 URI `ToDoIt.Controllers` 1.0 下注册 `AppShell`、`EventData` 与 `RichTextFormatter`；
+5. 在栈上构造 `RichTextFormatter` 与 `QuoteController`，使用 `qmlRegisterSingletonInstance()` 在 URI `ToDoIt.Controllers` 1.0 下注册 `AppShell`、`EventData`、`RichTextFormatter` 与 `QuoteData`；
 6. 加载 `qrc:/qt/qml/ToDoIt/Main.qml`，根对象为空时返回非零退出码；
 7. 进入 Qt 事件循环。
 
@@ -599,7 +612,7 @@ D:/Microsoft Visual Studio/18/Community/
 
 #### `src/platform/windows/CMakeLists.txt`
 
-定义 `todoit_windows_platform` INTERFACE target 及别名 `ToDoIt::WindowsPlatform`，只依赖 `ToDoIt::Application`。QWindowKit、DWM、文件服务和缩略图实现后在此声明依赖；当前 target 不代表 Acrylic 或无边框平台适配已经完成。
+定义 `todoit_windows_platform` STATIC target 及别名 `ToDoIt::WindowsPlatform`，公开依赖 `ToDoIt::Application` 与 Qt Core，编译 `NativeAttachmentDialog`；Windows 下私有链接系统 `ole32`、`shell32` 和 `uuid`。QWindowKit、DWM 和缩略图后续实现仍在此声明依赖；当前 target 已提供原生附件选择，但不代表 Acrylic 或无边框平台适配已经完成。
 
 `src/CMakeLists.txt` 按 Domain → Application → Infrastructure/WindowsPlatform/Presentation 的顺序加入子目录，主可执行文件只链接公开别名。Domain/Application 当前为仅头文件接口目标，Infrastructure/PresentationControllers 已是静态库。
 
@@ -886,9 +899,13 @@ ID 创建后不可修改，迁移时只能保留或为确实没有 ID 的旧记�
 - `verifySettings(file)`：校验 JSON 和版本。
 - `hashFile(path)`：为更新日志提供哈希，不读取内容到日志。
 
-### `src/platform/windows/` `[现有目录与目标，业务代码计划]`
+### `src/platform/windows/` `[现有原生附件选择，其余能力计划]`
 
 作用：隔离不可跨平台的窗口和 Windows Shell 能力。虽然产品仅支持 Windows，隔离后仍便于测试和替换库。
+
+#### `platform/windows/resources/ToDoIt.rc.in` `[现有]`
+
+Windows 资源模板声明稳定图标 ID `IDI_TODOIT_APPLICATION=101`。`src/CMakeLists.txt` 在配置阶段把 `@TODOIT_EXECUTABLE_ICON@` 替换为选中的自定义或默认 ICO 绝对路径，再把生成的 `.rc` 加入主程序目标；该模板只嵌入原生 EXE 图标，不负责 QML Logo、安装器界面或运行时资源切换。
 
 #### `platform/windows/window/WindowEffectsController.h/.cpp` `[计划]`
 
@@ -902,6 +919,10 @@ ID 创建后不可修改，迁移时只能保留或为确实没有 ID 的旧记�
 平台边界：Windows 11 Build 22621+ 才有官方 Desktop Acrylic；Windows 10 路径依赖 QWindowKit 内部的非公开系统能力，不能承诺与 Windows 11 完全一致。系统策略强制实色时控制器只报告状态，不尝试用高成本截图/Shader 冒充桌面背景。
 
 性能规则：原生/库调用只在创建、主题或窗口状态改变时执行；禁止在帧动画、事件行 delegate 或一分钟计时器中重复调用。
+
+#### `platform/windows/NativeAttachmentDialog.h/.cpp` `[现有]`
+
+`NativeAttachmentDialog` 是在 GUI 线程使用的 QML 单例。`chooseAttachments()` 用 RAII 管理当前线程的 COM 初始化，创建 Windows `IFileOpenDialog`，启用文件系统路径和多文件选择，并通过 `IFileDialogCustomize` 在同一个系统窗口加入“添加当前文件夹”按钮。普通确认返回多个文件 URL；文件夹按钮读取窗口当前目录并返回单个目录条目；用户取消返回空列表且不报错，真正的系统失败写入 `lastError`。事件接收器在栈上持有，严格在 `Advise`/`Unadvise` 之间生效，不使用裸 `new/delete`，不复制或移动附件内容。
 
 #### `platform/windows/shell/WindowsFileService.h/.cpp` `[计划]`
 
@@ -940,7 +961,7 @@ ID 创建后不可修改，迁移时只能保留或为确实没有 ID 的旧记�
 
 #### `presentation/controllers/CMakeLists.txt` `[现有]`
 
-构建 `todoit_presentation_controllers` 静态库及别名 `ToDoIt::PresentationControllers`，公开 `src/` 包含根以及 `Qt6::Core`、`Qt6::Gui` 与 `ToDoIt::Application`，私有链接 `Qt6::Quick` 供实现访问 `QQuickTextDocument`。`TODOIT_PROJECT_VERSION` 只在该目标内部由 `${PROJECT_VERSION}` 生成；显式源清单包含 `AppShellController`、`EventDataController` 与 `RichTextFormatter`，新增控制器时继续应用项目警告规则。
+构建 `todoit_presentation_controllers` 静态库及别名 `ToDoIt::PresentationControllers`，公开 `src/` 包含根以及 `Qt6::Core`、`Qt6::Gui` 与 `ToDoIt::Application`，私有链接 `Qt6::Quick` 供实现访问 `QQuickTextDocument`。`TODOIT_PROJECT_VERSION` 只在该目标内部由 `${PROJECT_VERSION}` 生成；显式源清单包含 `AppShellController`、`EventDataController`、`QuoteController` 与 `RichTextFormatter`，新增控制器时继续应用项目警告规则。
 
 #### `presentation/controllers/AppShellController.h/.cpp` `[现有框架]`
 
@@ -967,7 +988,7 @@ ID 创建后不可修改，迁移时只能保留或为确实没有 ID 的旧记�
 - `fromUtf8()`、`parseDateTime()`、`displayDateTime()`：内部把已校验 UTF-8/ISO 8601 值转换为本地 `yyyy-MM-dd HH:mm`；空完成时间显示破折号。
 - `storageDateTime()`：把界面本地时间转换为带系统 UTC 偏移的 ISO 8601；空完成时间映射为空字段。
 - `attachmentPaths()`：把 QML 本地文件或文件夹 URL 转回本机绝对路径，拒绝相对附件路径；目录结尾分隔符被保留以供现有展示层区分类型。
-- `durationText()`：已完成使用完成时间，未完成使用构造控制器时的当前时间；未来开始显示“尚未开始”。当前没有分钟计时器，持续时间只在启动装载时计算一次。
+- `durationText()`：为启动快照提供初始持续时间；已完成使用完成时间，未完成使用构造控制器时的当前时间，未来开始显示“尚未开始”。页面接管后由 `EventTreeView` 在时间/状态提交时立即重算，并以单个一分钟计时器刷新未完成显示。
 - `attachmentText()`：把文件/文件夹绝对路径转换为 QML 可用的本地 URL，并以 Windows 文件名不允许出现的 `|` 连接供现有附件组件解析；目录结尾分隔符随 URL 往返。
 - `loadErrorText()`：格式化展示层诊断，不更改仓储结果。
 
@@ -1042,12 +1063,16 @@ ID 创建后不可修改，迁移时只能保留或为确实没有 ID 的旧记�
 
 所有未完成事件共享该信号，不为每行创建 Timer。
 
-#### `presentation/controllers/QuoteController.h/.cpp` `[计划]`
+#### `presentation/controllers/QuoteController.h/.cpp` `[现有离线名言控制器]`
 
-- `loadVerifiedQuotes()`：载入并验证名言资源。
-- `chooseRandom()`：启动时随机且尽量避免连续重复。
-- `nextRandom()`：响应手动刷新。
-- `fontScaleFor(width, metrics)`：默认布局最低 50%；用户缩窗路径允许继续缩小。
+进程级 QML 单例从 `qrc:/qt/qml/ToDoIt/content/philosophy_quotes.json` 读取数据，并只保留正文、作者、出处均非空且 `verified=true` 的记录：
+
+- `load()`：要求根对象、`schemaVersion=1`，并验证声明 `count` 与数组长度完全一致；格式不合法时转入安全回退。
+- `refreshQuote()`：使用 `QRandomGenerator` 随机选择记录；存在多条时避免与当前条目立即重复，更新正文、作者和出处后发出 `quoteChanged()`。
+- `quote`、`author`、`source`：随换句通知的只读属性；`loadError`、`availableCount` 在构造后固定。
+- `useFallback(error)`：保留中文诊断并提供一条内置文本，保证名言区不会因资源错误变空。
+
+字号适配继续由 `QuoteBanner.qml` 负责，控制器不依赖 QML 尺寸，也不执行网络请求。
 
 #### `presentation/controllers/ThemeController.h/.cpp` `[计划]`
 
@@ -1071,7 +1096,7 @@ ID 创建后不可修改，迁移时只能保留或为确实没有 ID 的旧记�
 
 ### `src/presentation/qml/CMakeLists.txt` `[现有]`
 
-作用：由 `src/CMakeLists.txt` 使用 `include()` 在主目标目录作用域内加载，并用 `qt_add_qml_module()` 声明 `ToDoIt` QML 模块及当前全部页面、组件、效果、样式和默认 SVG。清单循环计算 QML 相对别名，并逐项把默认 SVG 映射到 `qrc:/qt/qml/ToDoIt/icons/`；`IconCatalog`、`Theme`、`Metrics`、`Typography`、`Motion` 设置 `QT_QML_SINGLETON_TYPE`，由 QML 模块统一提供。
+作用：由 `src/CMakeLists.txt` 使用 `include()` 在主目标目录作用域内加载，并用 `qt_add_qml_module()` 声明 `ToDoIt` QML 模块及当前全部页面、组件、效果、样式、默认 SVG 和离线名言 JSON。清单循环计算 QML 相对别名，逐项把默认 SVG 映射到 `qrc:/qt/qml/ToDoIt/icons/`，并把 `assets/quotes/philosophy_quotes.json` 映射为 `qrc:/qt/qml/ToDoIt/content/philosophy_quotes.json`；`IconCatalog`、`Theme`、`Metrics`、`Typography`、`Motion` 设置 `QT_QML_SINGLETON_TYPE`，由 QML 模块统一提供。
 
 可编辑内容：新增 QML 文件清单、单例属性和资源别名。文件移动后必须同步资源 URL、本地路径变量和本文件；新增长路径资源时必须逐项声明相对别名。该文件是被包含的目标清单，不是独立子目录入口，不得在这里创建另一个同名目标。
 
@@ -1085,7 +1110,7 @@ ID 创建后不可修改，迁移时只能保留或为确实没有 ID 的旧记�
 
 ### `src/presentation/qml/pages/MainPage.qml` `[现有 CSV 展示页面]`
 
-按垂直顺序组合 `FramelessTitleBar`、`InfoFilterBar`、事件列表 `GlassPanel` 和 `BottomHelpBar`；事件列表内部再组合 `EventTableHeader` 与 `EventTreeView`。页面导入 `ToDoIt.Controllers 1.0`，将 `EventData.events` 和 `createEventId()` 工厂交给事件树，并把动态筛选选项、统计标签与计数绑定回信息栏。事件树发出完整快照时调用同步 `EventData.saveEvents()`；失败则重新置脏并优先显示 `EventData.saveError`。`flushPendingChanges()` 供根窗口关闭前刷新；页面仍通过 `pointInsideItem()`、`clearFocusWhenTappedOutside()`、延后 `TapHandler` 和 `releaseInputFocusRequested()` 协调输入焦点，不直接解析或写 CSV。
+按垂直顺序组合 `FramelessTitleBar`、`InfoFilterBar`、事件列表 `GlassPanel` 和 `BottomHelpBar`；事件列表内部再组合 `EventTableHeader` 与 `EventTreeView`。页面导入 `ToDoIt.Controllers 1.0`，把 `QuoteData.quote/author` 绑定给信息栏并将双击换句转发到 `QuoteData.refreshQuote()`；加载诊断进入默认底栏提示。页面同时将 `EventData.events` 和 `createEventId()` 工厂交给事件树，并把动态筛选选项、统计标签与计数绑定回信息栏。事件树发出完整快照时调用同步 `EventData.saveEvents()`；失败则重新置脏并优先显示 `EventData.saveError`。`flushPendingChanges()` 供根窗口关闭前刷新；页面仍通过 `pointInsideItem()`、`clearFocusWhenTappedOutside()`、延后 `TapHandler` 和 `releaseInputFocusRequested()` 协调输入焦点，不直接解析或写 CSV/JSON。
 
 ### `src/presentation/qml/components/` `[现有 CSV 展示、交互与快照保存协调]`
 
@@ -1101,22 +1126,21 @@ ID 创建后不可修改，迁移时只能保留或为确实没有 ID 的旧记�
 | `AppLogo.qml` | 已实现图标接口 | `source` 默认取稳定 `IconCatalog.appLogo`；CMake 可从 `assets/logos/custom/app.svg` 或默认 Logo 绑定该资源。组件公开 `accessibleName`、`hasImage`，不使用文字符号模拟 Logo |
 | `ExpandableSearchBox.qml` | 已实现主页面交互 | `text`、`selectedField`、`collapseDelay`、`queryEdited()`、`querySubmitted()`、`fieldChanged()`；圆形锚点固定并向右展开至 460 px；普通悬停离开仍延迟 800 ms，切换到外部控件后空搜索通过 `collapseImmediatelyIfIdle()` 立即收起，非空搜索保持展示 |
 | `SearchFieldSelector.qml` | 已实现主页面交互 | 94 px 无内框紧凑选择器完整显示“全部/事项名称/备注/附件名称”，弹层最低 116 px、使用 `PopupGlassBackground` 模糊被覆盖页面并叠加深色石墨遮罩，不使用省略号；公开 `fieldSelected()` |
-| `QuoteBanner.qml` | 已实现主页面视觉 | `quote`、`author`、`refreshRequested()`；名言和作者强制单行，正常宽度不放大，窗口缩小时可降至极小字号，双击只发出换句请求 |
+| `QuoteBanner.qml` | 已实现主页面视觉 | `quote`、`author`、`refreshRequested()`；显示 `QuoteData` 经页面注入的名言和作者并强制单行，正常宽度不放大，窗口缩小时可降至极小字号，双击只发出换句请求，不读取数据文件 |
 | `StatusFilterComboBox.qml` | 已实现动态模型接口 | 默认系统筛选只有“未完成事项/全部事项”，外部 `options` 接收事件树根据 CSV 实际状态汇总的选项；下拉层使用 `PopupGlassBackground`，公开 `selectedStatus`、`filterRequested()` |
 | `StatusSummary.qml` | 已实现动态统计展示 | `label`、`matchedCount`、`totalCount`、只读 `percentage`；不含固定 6 项/35% 的演示默认值，初始为 0/0，只格式化事件树传入的真实统计 |
-| `InfoFilterBar.qml` | 已实现动态绑定接口 | 左侧单行名言，右侧彼此分离的筛选框和统计框；公开 `filterOptions`、`summaryLabel`、`matchedCount`、`totalCount` alias 及筛选/名言/帮助信号，不计算事件数据 |
+| `InfoFilterBar.qml` | 已实现动态绑定接口 | 左侧单行名言，右侧彼此分离的筛选框和统计框；公开 `quote`、`quoteAuthor`、`filterOptions`、`summaryLabel`、`matchedCount`、`totalCount` alias 及筛选/名言/帮助信号，不计算事件数据 |
 | `FieldFrame.qml` | 已实现 | 原子字段统一圆角框；`contentPadding`、`highlighted`、`fillColor`，使用 `Theme.fieldOutline` 提供清晰而克制的字段边界 |
 | `EventTableHeader.qml` | 已实现主页面交互 | 46 px 无子 level 的七列表头，使用半高低对比纵向分隔线明确列边界，标题字体增大，22 px 紧凑排序箭头紧贴字段名称；与列表共用相同列宽和 10 px 滚动条槽，发出排序请求并只显示方向状态，不显示数字优先级 |
 | `SortButton.qml` | 已实现图标接口 | `direction`、`directionRequested()`；用 `sort-up.svg`/`sort-down.svg` 在 22 px 高范围内紧凑表示方向，活动箭头带主题强调色圆形底且不透明，另一方向弱化；再次点击活动方向请求取消，不显示优先级徽标 |
-| `EventTreeView.qml` | 已实现 CSV 展示、交互与快照保存协调 | `replaceSourceEvents()` 装载真实快照且代码内无示例；动态生成状态、统计、筛选树和编号。`isEventCardHovered()` 通过 `eventRepeater.itemAt()` 读取委托实时悬停状态；`scheduleDetailsCloseIfInactive()` 统一排除编辑锁与附件固定锁后安排收起；`releasePinnedDetails()` 在附件选择取消或 2.5 秒展示期结束时解除固定并重新判断。详情展开、切换和收起计时器均在提交状态前复核真实悬停，清除过期的 pending/deferred ID。`requestAttachmentSelection()` 先停止上一轮展示计时器，再固定当前事项并打开统一浏览器；`attachSelectedEntries()` 在目标消失时也会释放固定，否则去重文件/目录 URL、为目录补结尾分隔符并只在确有新增时标脏；`openAttachment()` 区分目录提示。`persistentSnapshot()` 排除空草稿，5 分钟仅在脏状态发出快照；记录 `dragHoverMode` 和 `settlingEventId`，完成子项/同级/一级移动后让委托的横向缩进、宽度、纵向位置和缩放连续过渡 |
-| `EventCard.qml` | 已实现主页面交互 | 完整事项外框是悬停、右键、左键激活和拖放命中区；只读 `pointerHovered` 对外暴露当前 `HoverHandler` 状态，供详情状态机在异步计时器触发时复核。`DragHandler.parent=root` 让命中区随事项卡高度覆盖展开后的附件与备注框，5 px 阈值区分普通点击和拖动，热点直接使用整卡坐标。`childDropActive` 与 `ordinaryHoverActive` 把投放高亮和普通悬停分离：child 才整卡高亮且必然成为子事项，before/after 只显示对应 3 px 边缘插入线。拖动期间把委托 `z` 提升并在原位覆盖低对比占位，可见 `dragProxy` 通过 `Drag.source` 保留事件 ID，并显示当前落位模式。 |
+| `EventTreeView.qml` | 已实现 CSV 展示、交互与快照保存协调 | `replaceSourceEvents()` 装载真实快照且代码内无示例，并先以当前中国时间刷新持续时间。根级 `TapHandler` 配合 `pointHitsEventContent()` 让事项卡间、添加按钮下方和空列表视口点击释放输入焦点；不会替代事项卡或添加按钮自身交互。备注输入期间只更新源模型，`updateDetailsEditing(..., false)` 在退出编辑后同步可见备注，避免模型回写干扰当前 `TextArea`。`durationForTimes()` 计算完成/未完成/尚未开始文本；开始时间、完成时间或状态提交成功后立即更新，统一 60 秒计时器只同步源模型与可见模型字段，不重建排序、不标脏。持续时间排序生效时，时间字段提交不会立刻重建模型：`durationSortPendingAfterTimeEdit` 记录待排状态，`anyEventContentEditing()` 扫描全部可见事项的统一 `editingLocked` 并检查 `attachmentSelectionActive`，`scheduleDurationSortAfterEdit()` 与 `durationSortDelayTimer` 只在所有事项内容连续停止编辑 500 ms 后启动位置动画并重建一次；编辑焦点在事项或字段间转移以及再次提交修改时都会停止并重新等待。`requestAttachmentSelection()` 固定当前事项、启用编辑门禁并同步调用 Windows `AttachmentDialog`；返回后添加系统选择结果、显示平台错误或按取消路径解锁。动态生成状态、统计、筛选树和编号。`isEventCardHovered()` 通过 `eventRepeater.itemAt()` 读取委托实时悬停状态；`scheduleDetailsCloseIfInactive()` 统一排除编辑锁与附件固定锁后安排收起；`releasePinnedDetails()` 在附件选择取消或 2.5 秒展示期结束时解除固定并重新判断。`attachSelectedEntries()` 去重文件/目录 URL、为目录补结尾分隔符并只在确有新增时标脏；`openAttachment()` 区分目录提示。`persistentSnapshot()` 排除空草稿，5 分钟仅在脏状态发出快照；记录 `dragHoverMode` 和 `settlingEventId`，完成子项/同级/一级移动后让委托的横向缩进、宽度、纵向位置和缩放连续过渡 |
+| `EventCard.qml` | 已实现主页面交互 | 完整事项外框是悬停、右键、左键激活和拖放命中区；只读 `pointerHovered` 对外暴露当前 `HoverHandler` 状态，统一 `editingLocked` 合并名称、开始/完成时间、状态和备注（含调色盘）的编辑状态，`editingStateChanged()` 把变化交给事件树的全局 500 ms 排序门禁。详情整体展开/收起使用 `Motion.detailsDuration`，备注正在编辑时禁用 `implicitHeight` 动画，使正文与事项边框随换行和删除同步伸缩。`DragHandler.parent=root` 让命中区随事项卡高度覆盖展开后的附件与备注框，5 px 阈值区分普通点击和拖动，热点直接使用整卡坐标。`childDropActive` 与 `ordinaryHoverActive` 把投放高亮和普通悬停分离：child 才整卡高亮且必然成为子事项，before/after 只显示对应 3 px 边缘插入线。拖动期间把委托 `z` 提升并在原位覆盖低对比占位，可见 `dragProxy` 通过 `Drag.source` 保留事件 ID，并显示当前落位模式。 |
 | `CompactDateEditor.qml` | 已实现交互与校验 | `text`、`allowEmpty`、只读 `editing`/`visuallyEmpty`、`invalidInput`、`valueEdited()`、`validationFailed()`；单一普通 `TextField` 固定为 16 字符并由 `digitPositions` 管理 12 个数字槽，不使用 Qt `inputMask`，因此鼠标可停在横线/空格/冒号前后，左右方向键逐字符移动；`enterDigit()`、`eraseBackward()`、`eraseForward()` 维护格式并自动跳到下一数字槽，提交时检查完整性、范围和闰年 |
 | `ImportanceSelector.qml` | 已实现视觉接口 | `levelIndex`、`levelRequested()`；恰好五个低饱和蓝灰等宽分段，累计点亮映射 1/3/5/7/9，不显示数字 |
 | `EditableStatusComboBox.qml` | 已实现视觉接口 | `statusText`、`statusOptions`、只读 `editing`、`statusEdited()`；既可输入也可从现有状态选择，状态色保持低饱和，下拉层统一使用应用内页面模糊和深色遮罩 |
-| `AttachmentPickerDialog.qml` | 已实现统一附件选择 | `selectedEntries`、`beginSelection()`、`toggleSelection()`、`enterFolder()`、`commitSelection()`、`selectionAccepted(entries)`、`selectionCancelled()`；`FolderListModel` 同时列出文件和目录，单击切换多选，双击目录进入；没有选择条目时“添加”提交当前目录，弹层关闭前保持模态并由事件树固定备注区 |
 | `AttachmentStrip.qml` | 已实现交互接口 | `attachmentKinds`、`addRequested()`、`removeRequested()`、`openRequested()`；“附件”使用 13 px 字体并与 32 px 缩略图顶部对齐，唯一末尾入口直接请求统一浏览器；目录以结尾分隔符识别并使用 `folder.svg`，文件和目录均双击打开，悬停显示完整路径和解除关联按钮 |
 | `ColorPalettePopup.qml` | 已实现自定义调色盘 | `selectedColor`、`applyRequested(color)`、`interactionStarted()`；圆形预设色与紧凑居中的 RGB 0–255、CMYK 0–100 输入实时双向同步，弹层保持打开以便重新选中文字并再次应用，点击关闭或外部区域才退出 |
-| `RichNoteEditor.qml` | 已实现选择范围格式与自适应高度 | `text`、只读 `editing`、`noteEdited(html)`、`helpRequested(message)`；“备注 · 富文本”标题使用 13 px，工具栏交互前保存非空选区，B 按钮和 `palette.svg` 按钮分别调用 `RichTextFormatter.toggleBold()` 或 `ColorPalettePopup`，应用后恢复选区。正文使用独立 `Typography.noteSize=15`，容器高度取最小高度与富文本 `contentHeight` 较大值，不使用内部滚动区域 |
+| `RichNoteEditor.qml` | 已实现选择范围格式与自适应高度 | `text`、只读 `editing`、`noteEdited(html)`、`helpRequested(message)`；“备注 · 富文本”标题使用 13 px，工具栏交互前保存非空选区，B 按钮和 `palette.svg` 按钮分别调用 `RichTextFormatter.toggleBold()` 或 `ColorPalettePopup`，应用后恢复选区。正文使用独立 `Typography.noteSize=15`，容器高度取最小高度与富文本 `contentHeight` 较大值，不使用内部滚动区域；事件树在编辑结束前不把模型值反向赋给该文本控件 |
 | `AddEventButton.qml` | 已实现主页面交互 | 34 px 单一入口由普通 `Item`、`HoverHandler`、`TapHandler` 和 `DropArea` 组成，不再继承 Qt `Button` 的调色/焦点状态；中央并排显示 20 px `add.svg` 和“添加事项”，悬停只改变低对比背景与描边；`addRequested()` 创建草稿，`rootDropRequested()` 继续负责移回一级 |
 | `WindowResizeHandles.qml` | 已实现窗口交互 | `hostWindow`、`handleWidth`、只读 `resizeEnabled`、`beginResize(edges)`；四条 6 px 边缘和四个 12 px 角落使用正确的水平/垂直/对角光标，按下调用 `Window.startSystemResize()`，最大化和全屏自动停用，不自行计算或持续写窗口几何 |
 | `BottomHelpBar.qml` | 已实现主页面视觉 | `message`、`severity`、`donationQrSource`、`helpRequested()`；无外框单行可复制提示右侧依次放置无背景、不可点击的“打赏一下”文字和 `arrow-right.svg`，仅末尾 24×24 圆角正方形 `donate.svg` 图标按钮可控制 `DonationPopup` 在右上方展开 |
@@ -1158,7 +1182,7 @@ ID 创建后不可修改，迁移时只能保留或为确实没有 ID 的旧记�
 
 ### Qt 6.11.2 `[外部 SDK / 运行时动态库]`
 
-首版使用 Qt 开源 LGPLv3 动态链接路线，当前直接链接依赖为 `Quick`、`QuickControls2` 和用于应用内弹层背景模糊的 `QuickEffects`，附件浏览器另外导入 Qt Declarative 随附的 `Qt.labs.folderlistmodel` QML 模块，并包括它们经审核的 LGPL 传递依赖。根 CMake 必须维护 Qt 模块许可白名单；新增 Qt 模块时先核对该确切版本的许可和 SBOM，GPL-only、未知许可或静态 Qt 目标在配置/打包阶段直接失败。
+首版使用 Qt 开源 LGPLv3 动态链接路线，当前直接链接依赖为 `Quick`、`QuickControls2` 和用于应用内弹层背景模糊的 `QuickEffects`；附件浏览器已改为 Windows SDK Shell COM，不再导入 `Qt.labs.folderlistmodel` 或链接 Qt Widgets。根 CMake 必须维护 Qt 模块许可白名单；新增 Qt 模块时先核对该确切版本的许可和 SBOM，GPL-only、未知许可或静态 Qt 目标在配置/打包阶段直接失败。
 
 开发 SDK 已安装并验证于 `D:/Qt/`，不提交、不复制进最终安装包。发行目录只部署运行所需 DLL、插件和 QML 模块，并同时生成 Qt 版本、文件哈希、许可证、对应源码归档及 DLL 替换说明。若改用商业 Qt，必须先完成采购与许可迁移审查，禁止把商业和开源 Qt 混入同一构建。
 
@@ -1184,7 +1208,7 @@ QWindowKit 1.5.0 源码固定快照，Apache-2.0。仅构建 Core 与 Quick；�
 
 #### `installer/config/config.xml.in` `[现有]`
 
-定义产品名、版本占位符、发布者、开始菜单目录、每用户默认安装目录、维护工具名、许可证页面和卸载不删除根目录策略。向导使用 `Classic`、显示左侧页面列表、加载 `style.qss`，基准尺寸为 1120×720，标题文本颜色与石墨主题一致。`@TODOIT_REMOTE_REPOSITORIES@` 由打包脚本替换为空字符串或一个固定 HTTPS 仓库；仓库设置页面对用户隐藏，`SaveDefaultRepositories=true` 明确让维护工具保存正式仓库，`AllowRepositoriesForOfflineInstaller` 同时允许离线脚本传入当次临时本地仓库。
+定义产品名、版本占位符、发布者、开始菜单目录、每用户默认安装目录、维护工具名、许可证页面和卸载不删除根目录策略。`InstallerApplicationIcon=todoit-installer` 引用打包脚本放入配置目录的同名 ICO（按 Qt IFW 规则不写扩展名）。向导使用 `Classic`、显示左侧页面列表、加载 `style.qss`，基准尺寸为 1120×720，标题文本颜色与石墨主题一致。`@TODOIT_REMOTE_REPOSITORIES@` 由打包脚本替换为空字符串或一个固定 HTTPS 仓库；仓库设置页面对用户隐藏，`SaveDefaultRepositories=true` 明确让维护工具保存正式仓库，`AllowRepositoriesForOfflineInstaller` 同时允许离线脚本传入当次临时本地仓库。
 
 #### `installer/config/style.qss` `[现有]`
 
@@ -1285,7 +1309,7 @@ Qt Designer/QUiLoader 动态页面，包含默认选中的保留数据单选项�
 - `scripts/build.ps1` `[现有]`：参数 `Preset`、`CMakePath`、`Parallel`、`Target` 与 `VisualStudioInstallPath`；导入 MSVC 后从项目根调用 `cmake --build --preset`，按需追加并行度或单一目标（例如 `all_qmllint`），失败原样传播。
 - `scripts/test.ps1` `[现有]`：参数 `Preset`、`CTestPath` 与 `Parallel`；验证 Qt 自带 CTest 后从项目根调用 `ctest --preset` 并原样传播失败。测试预设本身为进程提供 Qt DLL 路径，无需编译器环境。本阶段 QML lint 由 `build.ps1 -Target all_qmllint` 执行，Sanitizer 尚未集成。
 - `scripts/run.ps1` `[现有]`：参数 `Preset` 与 `QtBinPath`；验证 `build/<preset>/bin/ToDoIt.exe` 和 Qt bin 后，只为当前进程前置 Qt 路径；若项目根 `data/event.csv` 存在，再为子进程设置 `TODOIT_EVENT_FILE` 并同步启动程序。运行无需导入 MSVC 开发环境；脚本不运行 `windeployqt`，也不改变持久 PATH 或用户数据。
-- `scripts/package.ps1` `[现有]`：参数为 `Preset`、`CMakePath`、可选 `IfwRoot`/`RepositoryUrl` 和必填 `QtLicenseFile`。它先确认 Release 主程序、迁移器、版本清单与许可文件存在，HTTPS 校验可选仓库地址，再把受根目录边界保护的 `out/package-work` 作为唯一可清理临时目录；执行 `cmake --install` 而不构建，然后验证安装根的 EXE、清单、`qt.conf`、核心 Qt DLL、`qwindows.dll` 与 Qt Quick Controls 插件，并拒绝 `bin/Qt6Core.dll` 所代表的错误加载布局。通过后才生成逐文件大小/SHA-256 `release-files.json`，填充 IFW XML/控制脚本/欢迎页版本模板并复制 QSS 与卸载页。传入仓库地址时调用 `binarycreator --hybrid`，否则使用 `--offline-only`；随后调用 `repogen`，输出首次安装 EXE、离线更新 ZIP、在线仓库 ZIP、清单、发布元数据和覆盖这些附件的 `SHA256SUMS.txt` 到 `out/packages/`，失败直接终止。
+- `scripts/package.ps1` `[现有]`：参数为 `Preset`、`CMakePath`、可选 `IfwRoot`/`RepositoryUrl` 和必填 `QtLicenseFile`。它先确认 Release 主程序、迁移器、版本清单与许可文件存在，HTTPS 校验可选仓库地址，再把受根目录边界保护的 `out/package-work` 作为唯一可清理临时目录；创建 IFW 配置目录后优先选择 `assets/logos/custom/app.ico`，缺失则使用默认 ICO，并复制为 `todoit-installer.ico`。随后执行 `cmake --install` 而不构建，验证安装根的 EXE、清单、`qt.conf`、核心 Qt DLL、`qwindows.dll` 与 Qt Quick Controls 插件，并拒绝 `bin/Qt6Core.dll` 所代表的错误加载布局。通过后才生成逐文件大小/SHA-256 `release-files.json`，填充 IFW XML/控制脚本/欢迎页版本模板并复制 QSS 与卸载页。传入仓库地址时调用 `binarycreator --hybrid`，否则使用 `--offline-only`；随后调用 `repogen`，输出首次安装 EXE、离线更新 ZIP、在线仓库 ZIP、清单、发布元数据和覆盖这些附件的 `SHA256SUMS.txt` 到 `out/packages/`，失败直接终止。
 - `scripts/prepare-github-release.ps1` `[现有]`：必填 `Owner` 与 `Repository`，从 `publish-metadata.json` 读取并校验三段版本，限制 GitHub 标识字符，要求固化地址精确等于 `https://OWNER.github.io/REPOSITORY/updates/windows/x64`，并在复制前逐个核对 `SHA256SUMS.txt`；只在项目 `out/github-publish/v<version>/` 内清理和重建内容，将安装器、两类仓库 ZIP、清单、元数据及哈希复制到 `release-assets/`，把在线仓库解压到 `pages/updates/windows/x64/` 并生成 `.nojekyll`。脚本不调用 Git、GitHub API 或网络上传。
 
 脚本可编辑工具参数和步骤，不得重新实现 CSV 迁移、事件验证或备份算法。
@@ -1384,12 +1408,12 @@ Qt Designer/QUiLoader 动态页面，包含默认选中的保留数据单选项�
 
 ## 15. 当前实现状态
 
-当前发布目标为 0.2.1，事件与设置架构仍为 v1，不触发字段迁移。当前已完成：Domain/Application/Infrastructure/WindowsPlatform/Presentation 分层 target；进程级 `AppShell`、`EventData` 与 `RichTextFormatter` QML 单例入口；`EventRecord`、完整快照读写仓储端口、安装路径解析、UTF-8 BOM/RFC 4180 CSV 解析、13 列事件反序列化、树关系校验和 `QSaveFile` 原子序列化；依据最终设计稿实现的高保真主页面；集中主题、尺寸、排版、图标和动效令牌；VS Code 任务与 Qt Creator/Qt Design Studio 共用的 MSVC + Ninja 预设；配置/构建/指定目标/QML 检查/测试/运行脚本；Release CMake Install/Qt QML 部署、统一石墨 Qt IFW 混合/纯离线安装器、动态欢迎/卸载数据页面、GitHub Pages 在线仓库与离线更新包整理脚本、版本化字段清单、按稳定字段名通用迁移、显式删除字段门禁、迁移锁/永久备份/候选校验/原子替换/失败恢复/SHA-256/更新历史，以及应用壳和更新协调器两项 Qt Test 源码；共享/本机预设、默认资源路径模板、目录契约、需求基线和本开发手册。
+当前发布目标为 0.2.1，事件与设置架构仍为 v1，不触发字段迁移。当前已完成：Domain/Application/Infrastructure/WindowsPlatform/Presentation 分层 target；进程级 `AppShell`、`EventData`、`QuoteData`、`RichTextFormatter` 与 Windows `AttachmentDialog` QML 单例入口；`EventRecord`、完整快照读写仓储端口、安装路径解析、UTF-8 BOM/RFC 4180 CSV 解析、13 列事件反序列化、树关系校验和 `QSaveFile` 原子序列化；1000 条离线名言资源的版本/数量/核验字段校验与随机选择；依据最终设计稿实现的高保真主页面；集中主题、尺寸、排版、图标和动效令牌；VS Code 任务与 Qt Creator/Qt Design Studio 共用的 MSVC + Ninja 预设；配置/构建/指定目标/QML 检查/测试/运行脚本；Release CMake Install/Qt QML 部署、统一石墨 Qt IFW 混合/纯离线安装器、动态欢迎/卸载数据页面、GitHub Pages 在线仓库与离线更新包整理脚本、版本化字段清单、按稳定字段名通用迁移、显式删除字段门禁、迁移锁/永久备份/候选校验/原子替换/失败恢复/SHA-256/更新历史，以及应用壳和更新协调器两项 Qt Test 源码；共享/本机预设、默认资源路径模板、目录契约、需求基线和本开发手册。
 
-当前主页面已经显示无外框顶层菜单栏、可替换 SVG Logo、窗口按钮、四边四角鼠标缩放、只在移动超过系统阈值后启动的标题栏拖动、460 px 搜索、延后判断的页面级点击外部失焦、带页面模糊与石墨遮罩的统一高层弹层、等高信息栏、紧凑排序表头、层级事项卡、独立字段框、重要度、可编辑状态、固定数字槽时间、直接子项比例、220 ms 平滑且目标锁定的单一备注区域、覆盖滚动视口完整高度的 9 px 主题滚动条、统一文件/目录附件浏览器，以及同时显示 20 px 加号图片和“添加事项”文字的 34 px 添加入口。窗口底色与环境光使用单一圆角 alpha 蒙版整体裁剪，不再由矩形 `clip` 放任左上和右下的对角环境光进入透明角区。详情展开、切换和收起计时器会重新读取当前事项卡的真实悬停值，附件选择取消或短暂固定期结束也会统一重新判断收起条件，避免过期悬停 ID 造成备注偶发常驻。整张事项卡均可开始拖动，展开后命中范围同步覆盖附件和备注详情；拖动时显示跟随指针的浮动事项卡，只有 child 目标会整卡高亮并成为子事项，before/after 同级目标只显示对应边缘的 3 px 插入线；松开后真实卡片以约 260 ms 同时过渡缩进、宽度和位置。附件入口不再显示二级菜单；选择器支持多选、双击进入目录、无选择时添加当前目录并在关闭前固定备注区，已添加的文件和文件夹均双击打开。缩略图为 32 px，“附件”与缩略图顶部对齐；备注标题为 13 px、正文使用 15 px 独立字号，B 与 RGB/CMYK 调色盘只格式化当前选中文字；底部可复制提示右侧的“打赏一下”文字与箭头均无背景且不可点击，只有末尾圆角正方形图标按钮可打开可替换的打赏图片弹层。当前不加载液态玻璃材质，也不显示主题切换开关。
+当前主页面已经显示无外框顶层菜单栏、可替换 SVG Logo、随机单行哲学名言、窗口按钮、四边四角鼠标缩放、只在移动超过系统阈值后启动的标题栏拖动、460 px 搜索、覆盖卡片间与列表末尾空白的点击外部失焦、带页面模糊与石墨遮罩的统一高层弹层、等高信息栏、紧凑排序表头、层级事项卡、独立字段框、重要度、可编辑状态、固定数字槽时间、直接子项比例、220 ms 平滑且目标锁定的单一备注区域、覆盖滚动视口完整高度的 9 px 主题滚动条、Windows Shell 原生附件选择，以及同时显示 20 px 加号图片和“添加事项”文字的 34 px 添加入口。名言启动时随机选择，双击区域时重新随机且避免紧邻重复，资源异常时底栏显示诊断并保留回退文本。窗口底色与环境光使用单一圆角 alpha 蒙版整体裁剪，不再由矩形 `clip` 放任左上和右下的对角环境光进入透明角区。详情展开、切换和收起计时器会重新读取当前事项卡的真实悬停值，附件选择取消或短暂固定期结束也会统一重新判断收起条件，避免过期悬停 ID 造成备注偶发常驻。整张事项卡均可开始拖动，展开后命中范围同步覆盖附件和备注详情；拖动时显示跟随指针的浮动事项卡，只有 child 目标会整卡高亮并成为子事项，before/after 同级目标只显示对应边缘的 3 px 插入线；松开后真实卡片以约 260 ms 同时过渡缩进、宽度和位置。附件入口不显示二级菜单或应用自绘浏览器；Windows 原生窗口支持多选文件，并可通过同窗按钮添加当前文件夹，已添加的文件和文件夹均双击打开。缩略图为 32 px，“附件”与缩略图顶部对齐；备注标题为 13 px、正文使用 15 px 独立字号，编辑时正文与外框同步伸缩且不接受可见模型逐字符回写，B 与 RGB/CMYK 调色盘只格式化当前选中文字；底部可复制提示右侧的“打赏一下”文字与箭头均无背景且不可点击，只有末尾圆角正方形图标按钮可打开可替换的打赏图片弹层。当前不加载液态玻璃材质，也不显示主题切换开关。
 
-当前事项已接通 `event.csv` 双向快照：启动时从可执行文件相对 `data/event.csv` 读取，开发启动可用 `TODOIT_EVENT_FILE` 覆盖；目标不存在时先原子创建父目录与表头-only 空文件，已有文件绝不覆盖。CSV 字段解码现保持输入 `QByteArray` 生命周期直到 `QString` 实体化，修复合法 v1 文件的 `schema_version` 偶发误判，并在真正版本不支持时显示期望值和原始值。严格加载失败时列表为空、底部显示文件/行/列诊断并锁止写回。有效字段编辑、备注格式、文件/文件夹附件关联/解绑及树拖放只标记待保存；文件夹沿用 `attachments_json` 绝对路径数组并保留目录结尾分隔符，无需数据架构迁移。单个 5 分钟计时器仅在确有修改时生成不含空草稿的完整快照，正常关闭前再次检查并只刷新未落盘修改。拖动整卡可成为目标子事项、插入同级前后或投放到添加入口移回一级，目标为自身后代时拒绝。正式运行期资源定位器、真实打赏二维码、右键删除事务、普通保存备份与恢复、完整富文本白名单净化、持续时间分钟刷新、普通文件系统缩略图和平台磨砂仍未接入。
+当前事项已接通 `event.csv` 双向快照：启动时从可执行文件相对 `data/event.csv` 读取，开发启动可用 `TODOIT_EVENT_FILE` 覆盖；目标不存在时先原子创建父目录与表头-only 空文件，已有文件绝不覆盖。CSV 字段解码现保持输入 `QByteArray` 生命周期直到 `QString` 实体化，修复合法 v1 文件的 `schema_version` 偶发误判，并在真正版本不支持时显示期望值和原始值。严格加载失败时列表为空、底部显示文件/行/列诊断并锁止写回。有效字段编辑、备注格式、文件/文件夹附件关联/解绑及树拖放只标记待保存；文件夹沿用 `attachments_json` 绝对路径数组并保留目录结尾分隔符，无需数据架构迁移。开始时间、完成时间或状态提交后持续时间立即重算；统一 60 秒计时器只刷新未完成事项的内存显示值，不触发排序、保存或 CSV 架构变化。持续时间排序生效时，开始/完成时间的修改先建立待排序请求；所有事项的名称、时间、状态、备注编辑器与 Windows 原生附件选择过程必须连续空闲 500 ms 才执行一次动画重排，期间任一内容重新编辑或再次提交修改都会停止并重置等待。单个 5 分钟计时器仅在确有修改时生成不含空草稿的完整快照，正常关闭前再次检查并只刷新未落盘修改。拖动整卡可成为目标子事项、插入同级前后或投放到添加入口移回一级，目标为自身后代时拒绝。正式运行期资源定位器、真实打赏二维码、右键删除事务、普通保存备份与恢复、完整富文本白名单净化、普通文件系统缩略图和平台磨砂仍未接入。
 
-本次 0.2.1 改动已把 Windows 安装 bindir 调整到主程序根目录，新增运行库/插件静态打包门禁、完整安装器 QSS、版本化欢迎页、卸载数据选择/二次确认/成功后清理、各模式中文状态和新版本清单；同时保留既有 GitHub 在线/离线更新与字段迁移事务。全部修改遵循用户的“只编辑文件”要求；只做了 XML/文件内容的静态检查，没有重新配置、编译、运行、执行 QML lint、测试、CMake Install、调用 Qt IFW 或生成安装包。上述“已完成”只代表源码、脚本、模板与文档已经静态写入，不代表 0.2.1 安装器已经运行验证。
+本次 0.2.1 改动已把 Windows 安装 bindir 调整到主程序根目录，新增运行库/插件静态打包门禁、完整安装器 QSS、版本化欢迎页、卸载数据选择/二次确认/成功后清理、各模式中文状态和新版本清单；本轮继续接通随机名言、持续时间即时/分钟刷新、持续时间排序的全局 500 ms 事项编辑门禁、Windows RC EXE 图标、Qt IFW 安装器图标、Windows 原生附件选择、列表空白区失焦、备注即时高度同步和编辑模型隔离，同时保留既有 GitHub 在线/离线更新与字段迁移事务。全部修改遵循用户的“只编辑文件”要求；只做文件内容、资源键和职责边界的静态检查，没有重新配置、编译、运行、执行 QML lint、测试、CMake Install、调用 Qt IFW 或生成安装包。上述“已完成”只代表源码、脚本、模板与文档已经静态写入，不代表这些改动已经运行验证。
 
 此前应用壳基线已使用 `D:/Qt/Tools/CMake_64/bin/cmake.exe` 3.30.5、`D:/Qt/Tools/Ninja/ninja.exe` 1.12.1、Qt 6.11.2 `msvc2022_64` Kit，以及 Visual Studio 18 Community 提供的 x64 MSVC 19.51.36256.0，以 `local-dev` 预设完成全新配置与 Debug 编译；当时 `all_qmllint` 零警告、CTest 1/1 通过，并完成 3 秒启动冒烟。该历史结果不覆盖本次未执行的 CSV 改动验证。MSVC 不提供 UBSan，本阶段也尚未建立独立 ASan 预设，因此不声称 Sanitizer 已通过；更换 Kit 后必须使用全新缓存并重新验证。

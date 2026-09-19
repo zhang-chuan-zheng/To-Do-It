@@ -1,5 +1,6 @@
 #include <QGuiApplication>
 #include <QFile>
+#include <QIcon>
 #include <QQmlApplicationEngine>
 #include <QQmlError>
 #include <QTextStream>
@@ -8,8 +9,10 @@
 
 #include "infrastructure/path/InstallPaths.h"
 #include "infrastructure/persistence/CsvEventRepository.h"
+#include "platform/windows/NativeAttachmentDialog.h"
 #include "presentation/controllers/AppShellController.h"
 #include "presentation/controllers/EventDataController.h"
+#include "presentation/controllers/QuoteController.h"
 #include "presentation/controllers/RichTextFormatter.h"
 
 #include <cstdlib>
@@ -23,6 +26,8 @@ int main(int argc, char* argv[])
     application.setApplicationName(appShellController.applicationName());
     application.setApplicationVersion(appShellController.applicationVersion());
     application.setOrganizationName(QStringLiteral("ToDoIt"));
+    application.setWindowIcon(
+        QIcon(QStringLiteral(":/qt/qml/ToDoIt/icons/app.svg")));
 
     const auto executableDirectory = std::filesystem::path(
         QCoreApplication::applicationDirPath().toStdWString());
@@ -36,6 +41,8 @@ int main(int argc, char* argv[])
     todoit::presentation::EventDataController eventDataController(
         eventRepository, eventRepository.load(), eventFile);
     todoit::presentation::RichTextFormatter richTextFormatter;
+    todoit::presentation::QuoteController quoteController;
+    todoit::platform::windows::NativeAttachmentDialog attachmentDialog;
 
     qmlRegisterSingletonInstance(
         "ToDoIt.Controllers", 1, 0, "AppShell", &appShellController);
@@ -43,6 +50,10 @@ int main(int argc, char* argv[])
         "ToDoIt.Controllers", 1, 0, "EventData", &eventDataController);
     qmlRegisterSingletonInstance(
         "ToDoIt.Controllers", 1, 0, "RichTextFormatter", &richTextFormatter);
+    qmlRegisterSingletonInstance(
+        "ToDoIt.Controllers", 1, 0, "QuoteData", &quoteController);
+    qmlRegisterSingletonInstance(
+        "ToDoIt.Controllers", 1, 0, "AttachmentDialog", &attachmentDialog);
 
     QQmlApplicationEngine engine;
     QList<QQmlError> startupWarnings;

@@ -8,6 +8,8 @@ Item {
     property alias summaryLabel: statusSummary.label
     property alias matchedCount: statusSummary.matchedCount
     property alias totalCount: statusSummary.totalCount
+    property alias quote: quoteBanner.quote
+    property alias quoteAuthor: quoteBanner.author
     signal filterRequested(string status)
     signal quoteRefreshRequested()
     signal helpRequested(string message)
@@ -16,6 +18,7 @@ Item {
         anchors.fill: parent
         spacing: Metrics.spacingSmall
         QuoteBanner {
+            id: quoteBanner
             Layout.fillWidth: true
             Layout.minimumWidth: 360
             Layout.fillHeight: true

@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
+import ToDoIt.Controllers 1.0
 
 ScrollView {
     id: root
@@ -27,6 +28,8 @@ ScrollView {
     property bool hasDraft: false
     property bool persistenceDirty: false
     property bool reorderAnimationActive: false
+    property bool durationSortPendingAfterTimeEdit: false
+    property bool attachmentSelectionActive: false
     property bool dragInProgress: false
     property string draggedEventId: ""
     property string dragHoverEventId: ""
@@ -52,6 +55,32 @@ ScrollView {
     signal persistenceRequested(var events)
 
     clip: true
+
+    function pointInsideItem(item, pointInView) {
+        if (!item || !item.visible || !item.mapFromItem)
+            return false
+        const localPoint = item.mapFromItem(root, pointInView.x, pointInView.y)
+        return localPoint.x >= 0 && localPoint.x <= item.width
+            && localPoint.y >= 0 && localPoint.y <= item.height
+    }
+
+    function pointHitsEventContent(pointInView) {
+        for (let index = 0; index < eventRepeater.count; ++index) {
+            if (pointInsideItem(eventRepeater.itemAt(index), pointInView))
+                return true
+        }
+        return pointInsideItem(addEventButton, pointInView)
+    }
+
+    TapHandler {
+        acceptedButtons: Qt.LeftButton
+        gesturePolicy: TapHandler.ReleaseWithinBounds
+        onTapped: function(eventPoint) {
+            if (!root.pointHitsEventContent(eventPoint.position))
+                root.releaseInputFocusRequested()
+        }
+    }
+
     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
     ScrollBar.vertical: ScrollBar {
         id: eventScrollBar
@@ -190,6 +219,7 @@ ScrollView {
                 "isDraft": false
             })
         }
+        refreshAllDurations(false)
         rebuildVisibleModel()
     }
 
@@ -546,6 +576,12 @@ ScrollView {
             activateDetails(eventId)
             return
         }
+        const sourceIndex = sourceIndexForId(eventId)
+        const visibleIndex = visibleIndexForId(eventId)
+        if (sourceIndex >= 0 && visibleIndex >= 0) {
+            visibleModel.setProperty(visibleIndex, "note",
+                                     sourceModel.get(sourceIndex).note)
+        }
         if (editingDetailsEventId === eventId)
             editingDetailsEventId = ""
         if (pendingDetailsEventId.length > 0
@@ -605,16 +641,129 @@ ScrollView {
 
         sortKeys = keys
         updateSortState()
+        if (!sortFieldIsActive("duration")) {
+            durationSortPendingAfterTimeEdit = false
+            durationSortDelayTimer.stop()
+        }
+        if (durationSortPendingAfterTimeEdit) {
+            scheduleDurationSortAfterEdit()
+            return
+        }
         beginReorderAnimation()
         rebuildVisibleModel()
+    }
+
+    function sortFieldIsActive(field) {
+        for (let index = 0; index < sortKeys.length; ++index) {
+            if (sortKeys[index].field === field)
+                return true
+        }
+        return false
+    }
+
+    function anyEventContentEditing() {
+        if (attachmentSelectionActive)
+            return true
+        for (let index = 0; index < eventRepeater.count; ++index) {
+            const delegate = eventRepeater.itemAt(index)
+            if (delegate && delegate.editingLocked)
+                return true
+        }
+        return false
+    }
+
+    function scheduleDurationSortAfterEdit() {
+        if (!sortFieldIsActive("duration"))
+            return
+
+        durationSortPendingAfterTimeEdit = true
+        durationSortDelayTimer.stop()
+        Qt.callLater(function() {
+            if (root.durationSortPendingAfterTimeEdit
+                    && !root.anyEventContentEditing())
+                durationSortDelayTimer.restart()
+        })
+    }
+
+    function handleEventEditingChanged(active) {
+        if (active) {
+            durationSortDelayTimer.stop()
+            return
+        }
+        if (!durationSortPendingAfterTimeEdit)
+            return
+
+        Qt.callLater(function() {
+            if (root.durationSortPendingAfterTimeEdit
+                    && !root.anyEventContentEditing())
+                durationSortDelayTimer.restart()
+        })
     }
 
     function parsedDateTime(value) {
         const match = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/.exec(String(value || ""))
         if (!match)
             return NaN
-        return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]),
-                        Number(match[4]), Number(match[5]), 0, 0).getTime()
+        return Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]),
+                        Number(match[4]), Number(match[5]), 0, 0)
+    }
+
+    function durationPart(value, minimumWidth) {
+        let text = String(Math.max(0, Math.floor(value)))
+        while (text.length < minimumWidth)
+            text = "0" + text
+        return text
+    }
+
+    function durationForTimes(startAt, completedAt) {
+        const startTime = parsedDateTime(startAt)
+        if (isNaN(startTime))
+            return ""
+
+        const now = currentReferenceTime()
+        let endTime = parsedDateTime(completedAt)
+        if (isNaN(endTime)) {
+            if (startTime > now)
+                return qsTr("尚未开始")
+            endTime = now
+        }
+
+        const totalMinutes = Math.max(0, Math.floor((endTime - startTime) / 60000))
+        const days = Math.floor(totalMinutes / (24 * 60))
+        const hours = Math.floor(totalMinutes / 60) % 24
+        const minutes = totalMinutes % 60
+        return durationPart(days, 3) + qsTr(" 天 ")
+            + durationPart(hours, 2) + qsTr(" 时 ")
+            + durationPart(minutes, 2) + qsTr(" 分")
+    }
+
+    function refreshDurationAtSourceIndex(sourceIndex, updateVisibleRow) {
+        if (sourceIndex < 0 || sourceIndex >= sourceModel.count)
+            return false
+        const item = sourceModel.get(sourceIndex)
+        const nextDuration = durationForTimes(item.startAt, item.completedAt)
+        if (item.duration === nextDuration)
+            return false
+
+        sourceModel.setProperty(sourceIndex, "duration", nextDuration)
+        if (updateVisibleRow) {
+            const visibleIndex = visibleIndexForId(item.eventKey)
+            if (visibleIndex >= 0)
+                visibleModel.setProperty(visibleIndex, "duration", nextDuration)
+        }
+        return true
+    }
+
+    function refreshEventDuration(eventId, updateVisibleRow) {
+        return refreshDurationAtSourceIndex(sourceIndexForId(eventId), updateVisibleRow)
+    }
+
+    function refreshAllDurations(updateVisibleRows) {
+        for (let index = 0; index < sourceModel.count; ++index) {
+            const item = sourceModel.get(index)
+            if (!item.isDraft)
+                refreshDurationAtSourceIndex(index, updateVisibleRows)
+        }
     }
 
     function timeEditIsValid(item, field, value) {
@@ -644,7 +793,10 @@ ScrollView {
         if (field === "note") {
             sourceModel.setProperty(sourceIndex, field, value)
             const visibleIndex = visibleIndexForId(eventId)
-            if (visibleIndex >= 0)
+            const visibleDelegate = visibleIndex >= 0
+                ? eventRepeater.itemAt(visibleIndex) : null
+            if (visibleIndex >= 0
+                    && (!visibleDelegate || !visibleDelegate.editingLocked))
                 visibleModel.setProperty(visibleIndex, field, value)
             schedulePersistence()
             return
@@ -660,7 +812,9 @@ ScrollView {
             const title = String(value).trim()
             if (!item.isDraft && title.length === 0) {
                 helpRequested(qsTr("事项名称不能为空"))
-                rebuildVisibleModel()
+                const visibleIndex = visibleIndexForId(eventId)
+                if (visibleIndex >= 0)
+                    visibleModel.setProperty(visibleIndex, "titleText", item.titleText)
                 return
             }
             value = title
@@ -675,7 +829,10 @@ ScrollView {
                 }
             }
         }
-        if (sortKeys.length > 0)
+        const timeFieldEdited = field === "startAt" || field === "completedAt"
+        const deferDurationSort = sortFieldIsActive("duration")
+            && (timeFieldEdited || durationSortPendingAfterTimeEdit)
+        if (sortKeys.length > 0 && !deferDurationSort)
             beginReorderAnimation()
         sourceModel.setProperty(sourceIndex, field, value)
         if (field === "stateText" && value === qsTr("已完成")
@@ -688,7 +845,23 @@ ScrollView {
         }
         if (field === "titleText" && item.isDraft && String(value).length > 0)
             sourceModel.setProperty(sourceIndex, "isDraft", false)
-        rebuildVisibleModel()
+        if (deferDurationSort) {
+            const visibleIndex = visibleIndexForId(eventId)
+            if (visibleIndex >= 0) {
+                const updatedItem = sourceModel.get(sourceIndex)
+                visibleModel.setProperty(visibleIndex, field, updatedItem[field])
+                if (field === "stateText")
+                    visibleModel.setProperty(visibleIndex, "completedAt", updatedItem.completedAt)
+                if (field === "titleText")
+                    visibleModel.setProperty(visibleIndex, "isDraft", updatedItem.isDraft)
+            }
+        }
+        if (timeFieldEdited || field === "stateText")
+            refreshEventDuration(eventId, deferDurationSort)
+        if (deferDurationSort)
+            scheduleDurationSortAfterEdit()
+        else
+            rebuildVisibleModel()
         schedulePersistence()
     }
 
@@ -847,7 +1020,26 @@ ScrollView {
 
     function requestAttachmentSelection(eventId) {
         prepareAttachmentSelection(eventId)
-        attachmentPicker.beginSelection()
+        let selectedEntries = []
+        attachmentSelectionActive = true
+        handleEventEditingChanged(true)
+        try {
+            selectedEntries = AttachmentDialog.chooseAttachments()
+        } finally {
+            attachmentSelectionActive = false
+            handleEventEditingChanged(false)
+        }
+
+        if (AttachmentDialog.lastError.length > 0)
+            helpRequested(AttachmentDialog.lastError)
+
+        if (selectedEntries && selectedEntries.length > 0) {
+            attachSelectedEntries(selectedEntries)
+            return
+        }
+
+        pendingAttachmentEventId = ""
+        releasePinnedDetails(eventId)
     }
 
     function attachSelectedEntries(selectedEntries) {
@@ -873,8 +1065,15 @@ ScrollView {
             ++addedCount
         }
         if (addedCount > 0) {
-            sourceModel.setProperty(sourceIndex, "files", paths.join("|"))
-            rebuildVisibleModel()
+            const joinedPaths = paths.join("|")
+            sourceModel.setProperty(sourceIndex, "files", joinedPaths)
+            const visibleIndex = visibleIndexForId(eventId)
+            if (visibleIndex >= 0)
+                visibleModel.setProperty(visibleIndex, "files", joinedPaths)
+            if (durationSortPendingAfterTimeEdit)
+                scheduleDurationSortAfterEdit()
+            else
+                rebuildVisibleModel()
             schedulePersistence()
         }
         helpRequested(addedCount > 0
@@ -893,8 +1092,15 @@ ScrollView {
         if (attachmentIndex < 0 || attachmentIndex >= paths.length)
             return
         paths.splice(attachmentIndex, 1)
-        sourceModel.setProperty(sourceIndex, "files", paths.join("|"))
-        rebuildVisibleModel()
+        const joinedPaths = paths.join("|")
+        sourceModel.setProperty(sourceIndex, "files", joinedPaths)
+        const visibleIndex = visibleIndexForId(eventId)
+        if (visibleIndex >= 0)
+            visibleModel.setProperty(visibleIndex, "files", joinedPaths)
+        if (durationSortPendingAfterTimeEdit)
+            scheduleDurationSortAfterEdit()
+        else
+            rebuildVisibleModel()
         schedulePersistence()
         helpRequested(qsTr("已解除附件关联，原文件没有从磁盘删除"))
     }
@@ -917,18 +1123,6 @@ ScrollView {
 
     ListModel { id: visibleModel }
 
-    AttachmentPickerDialog {
-        id: attachmentPicker
-        onSelectionAccepted: function(entries) {
-            root.attachSelectedEntries(entries)
-        }
-        onSelectionCancelled: {
-            const eventId = root.pinnedEventId
-            root.pendingAttachmentEventId = ""
-            root.releasePinnedDetails(eventId)
-        }
-    }
-
     Timer {
         id: persistenceTimer
         interval: 5 * 60 * 1000
@@ -937,6 +1131,32 @@ ScrollView {
         onTriggered: {
             if (root.persistenceDirty)
                 root.flushPersistence()
+        }
+    }
+
+    Timer {
+        id: durationRefreshTimer
+        interval: 60 * 1000
+        repeat: true
+        running: true
+        onTriggered: root.refreshAllDurations(true)
+    }
+
+    Timer {
+        id: durationSortDelayTimer
+        interval: 500
+        repeat: false
+        onTriggered: {
+            if (!root.durationSortPendingAfterTimeEdit)
+                return
+            if (root.anyEventContentEditing())
+                return
+
+            root.durationSortPendingAfterTimeEdit = false
+            if (!root.sortFieldIsActive("duration"))
+                return
+            root.beginReorderAnimation()
+            root.rebuildVisibleModel()
         }
     }
 
@@ -1118,6 +1338,7 @@ ScrollView {
                     onReleaseInputFocusRequested: root.releaseInputFocusRequested()
                     onEditingStateChanged: function(editing) {
                         root.updateDetailsEditing(eventKey, editing)
+                        root.handleEventEditingChanged(editing)
                     }
                     onHelpRequested: function(message) { root.helpRequested(message) }
 
@@ -1145,6 +1366,7 @@ ScrollView {
             }
 
             AddEventButton {
+                id: addEventButton
                 width: parent.width
                 visible: !root.hasDraft
                 onAddRequested: {

@@ -5,7 +5,6 @@ set(todoit_qml_files
     "${todoit_qml_root}/pages/MainPage.qml"
     "${todoit_qml_root}/components/AddEventButton.qml"
     "${todoit_qml_root}/components/AppLogo.qml"
-    "${todoit_qml_root}/components/AttachmentPickerDialog.qml"
     "${todoit_qml_root}/components/AttachmentStrip.qml"
     "${todoit_qml_root}/components/BottomHelpBar.qml"
     "${todoit_qml_root}/components/CompactDateEditor.qml"
@@ -59,8 +58,16 @@ set_source_files_properties(${todoit_qml_singletons} PROPERTIES
 )
 
 set(todoit_asset_root "${todoit_qml_root}/../../../assets")
+set(todoit_quote_file "${todoit_asset_root}/quotes/philosophy_quotes.json")
+set_source_files_properties("${todoit_quote_file}" PROPERTIES
+    QT_RESOURCE_ALIAS "content/philosophy_quotes.json"
+)
 set(todoit_default_app_logo "${todoit_asset_root}/logos/default/app.svg")
 set(todoit_custom_app_logo "${todoit_asset_root}/logos/custom/app.svg")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+    "${todoit_default_app_logo}"
+    "${todoit_custom_app_logo}"
+)
 set(todoit_app_logo "${todoit_default_app_logo}")
 if(EXISTS "${todoit_custom_app_logo}")
     set(todoit_app_logo "${todoit_custom_app_logo}")
@@ -128,4 +135,5 @@ qt_add_qml_module(ToDoIt
         ${todoit_qml_files}
     RESOURCES
         ${todoit_icon_files}
+        "${todoit_quote_file}"
 )

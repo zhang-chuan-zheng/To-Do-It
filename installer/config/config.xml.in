@@ -4,6 +4,7 @@
     <Version>@TODOIT_VERSION@</Version>
     <Title>To Do It 安装与维护</Title>
     <Publisher>To Do It</Publisher>
+    <InstallerApplicationIcon>todoit-installer</InstallerApplicationIcon>
     <StartMenuDir>To Do It</StartMenuDir>
     <TargetDir>@HomeDir@/AppData/Local/Programs/ToDoIt</TargetDir>
     <MaintenanceToolName>ToDoItMaintenanceTool</MaintenanceToolName>

@@ -523,6 +523,7 @@ Item {
     }
 
     Behavior on implicitHeight {
+        enabled: !noteEditor.editing
         NumberAnimation { duration: Motion.detailsDuration; easing.type: Easing.InOutCubic }
     }
 

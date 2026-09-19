@@ -152,6 +152,19 @@ $packageMeta = Join-Path $packageRoot 'meta'
 [void](New-Item -ItemType Directory -Path $packageData)
 [void](New-Item -ItemType Directory -Path $packageMeta)
 
+$defaultInstallerIcon = Join-Path $projectRoot 'assets/logos/default/app.ico'
+$customInstallerIcon = Join-Path $projectRoot 'assets/logos/custom/app.ico'
+$installerIcon = if (Test-Path -LiteralPath $customInstallerIcon -PathType Leaf) {
+    $customInstallerIcon
+} else {
+    $defaultInstallerIcon
+}
+if (-not (Test-Path -LiteralPath $installerIcon -PathType Leaf)) {
+    throw "Windows application icon is missing: $installerIcon"
+}
+Copy-Item -LiteralPath $installerIcon `
+    -Destination (Join-Path $configRoot 'todoit-installer.ico')
+
 # This performs CMake install/deployment only. It does not invoke a build.
 & $CMakePath --install $buildDirectory --prefix $stageRoot --config Release
 if ($LASTEXITCODE -ne 0) {
