@@ -24,16 +24,26 @@
   ],
   "eventMigrations": [],
   "programChanges": {
-    "summary": "Installer recovery release with a unified graphite interface and complete Qt runtime deployment",
+    "summary": "Installer recovery and interaction stability release with native Windows attachments, timed quotes, and event context actions",
     "added": [
       "Graphite Qt IFW styling for installation, maintenance, update, uninstall, progress, and error states",
       "Explicit uninstall choice for retaining or permanently removing user data",
-      "Release packaging checks for co-located Qt runtime libraries, platform plugins, and QML modules"
+      "Release packaging checks for co-located Qt runtime libraries, platform plugins, and QML modules",
+      "Windows Shell native file and folder attachment selection",
+      "Verified offline philosophy quote library with visible-window two-minute rolling refresh",
+      "Graphite event context menu for creating child events and confirming subtree deletion"
     ],
     "changed": [
       "Installed Qt runtime libraries beside ToDoIt.exe so a clean Windows machine can start the application",
       "Localized installer page titles, guidance, buttons, license acceptance, and completion messages",
-      "Expanded the installer window and page list to match the approved compact graphite design"
+      "Expanded the installer window and page list to match the approved compact graphite design",
+      "Reduced the title bar to 46 px while restoring the original logo, search anchor, and window-control sizes",
+      "Changed the status summary to pending and completed item counts",
+      "Vertically centered the left-aligned quote and lengthened its top-to-center and center-to-bottom rolling transition",
+      "Protected empty event drafts while their title editor retains keyboard focus",
+      "Deferred hover-driven note switching while any event editor retains focus",
+      "Stabilized note focus, synchronous note-card resizing, blank-area focus release, duration refresh, and deferred duration sorting",
+      "Added replaceable Windows executable and installer icon resources"
     ],
     "removed": []
   }

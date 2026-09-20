@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Window
 import ToDoIt.Controllers 1.0
 
 Item {
@@ -21,6 +22,13 @@ Item {
 
     function flushPendingChanges() {
         taskTree.flushPersistence()
+    }
+
+    function refreshQuote() {
+        if (!hostWindow || !hostWindow.visible
+                || hostWindow.visibility === Window.Minimized)
+            return
+        QuoteData.refreshQuote()
     }
 
     function pointInsideItem(item, scenePosition) {
@@ -72,9 +80,8 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: Metrics.infoBarHeight
             filterOptions: taskTree.availableFilterOptions
-            summaryLabel: taskTree.summaryLabel
-            matchedCount: taskTree.summaryMatchedCount
-            totalCount: taskTree.totalSourceCount
+            pendingCount: taskTree.summaryPendingCount
+            completedCount: taskTree.summaryCompletedCount
             quote: QuoteData.quote
             quoteAuthor: QuoteData.author
             onFilterRequested: function(status) {
@@ -82,7 +89,7 @@ Item {
                 root.statusFilterRequested(status)
             }
             onHelpRequested: function(message) { root.showHelp(message) }
-            onQuoteRefreshRequested: QuoteData.refreshQuote()
+            onQuoteRefreshRequested: root.refreshQuote()
         }
         GlassPanel {
             Layout.fillWidth: true
@@ -138,5 +145,14 @@ Item {
             message: root.helpText
             onHelpRequested: function(message) { root.showHelp(message) }
         }
+    }
+
+    Timer {
+        id: quoteRefreshTimer
+        interval: 2 * 60 * 1000
+        repeat: true
+        running: root.hostWindow && root.hostWindow.visible
+            && root.hostWindow.visibility !== Window.Minimized
+        onTriggered: root.refreshQuote()
     }
 }

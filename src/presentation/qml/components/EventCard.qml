@@ -37,6 +37,8 @@ Item {
     readonly property bool ordinaryHoverActive: cardHover.hovered
         && dropMode.length === 0
     signal deleteRequested()
+    signal createChildRequested()
+    signal contextMenuStateChanged(bool active)
     signal fieldEdited(string field, var value)
     signal moveRequested(string draggedId, string targetId, string mode)
     signal attachmentAddRequested()
@@ -107,6 +109,7 @@ Item {
         onTriggered: {
             if (root.draftMode && !cardHover.hovered
                     && titleInput.text.trim().length === 0
+                    && !titleInput.activeFocus
                     && !titleInput.inputMethodComposing
                     && !startEditor.editing && !completionEditor.editing
                     && !statusEditor.editing && !noteEditor.editing)
@@ -116,7 +119,22 @@ Item {
 
     TapHandler {
         acceptedButtons: Qt.RightButton
-        onTapped: root.deleteRequested()
+        gesturePolicy: TapHandler.ReleaseWithinBounds
+        onTapped: function(eventPoint) {
+            root.releaseInputFocusRequested()
+            contextMenu.openAt(eventPoint.position.x,
+                               eventPoint.position.y,
+                               root.width, root.height)
+        }
+    }
+
+    EventContextMenu {
+        id: contextMenu
+        parent: root
+        onCreateChildRequested: root.createChildRequested()
+        onDeleteRequested: root.deleteRequested()
+        onOpened: root.contextMenuStateChanged(true)
+        onClosed: root.contextMenuStateChanged(false)
     }
 
     TapHandler {
@@ -415,8 +433,11 @@ Item {
                     acceptingReturn = false
                 }
                 onActiveFocusChanged: {
-                    if (!activeFocus && root.draftMode && !cardHover.hovered)
+                    if (activeFocus) {
+                        draftExitTimer.stop()
+                    } else if (root.draftMode && !cardHover.hovered) {
                         draftExitTimer.restart()
+                    }
                 }
             }
 
@@ -528,14 +549,18 @@ Item {
     }
 
     onDraftModeChanged: {
-        if (draftMode)
+        if (draftMode) {
+            draftExitTimer.stop()
             Qt.callLater(function() { titleInput.forceActiveFocus(Qt.OtherFocusReason) })
+        }
     }
 
     onEditingLockedChanged: root.editingStateChanged(editingLocked)
 
     Component.onCompleted: {
-        if (draftMode)
+        if (draftMode) {
+            draftExitTimer.stop()
             Qt.callLater(function() { titleInput.forceActiveFocus(Qt.OtherFocusReason) })
+        }
     }
 }

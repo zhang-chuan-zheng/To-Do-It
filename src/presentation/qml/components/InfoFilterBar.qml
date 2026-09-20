@@ -5,9 +5,8 @@ Item {
     id: root
     property alias selectedStatus: filterBox.selectedStatus
     property alias filterOptions: filterBox.options
-    property alias summaryLabel: statusSummary.label
-    property alias matchedCount: statusSummary.matchedCount
-    property alias totalCount: statusSummary.totalCount
+    property alias pendingCount: statusSummary.pendingCount
+    property alias completedCount: statusSummary.completedCount
     property alias quote: quoteBanner.quote
     property alias quoteAuthor: quoteBanner.author
     signal filterRequested(string status)
@@ -20,7 +19,7 @@ Item {
         QuoteBanner {
             id: quoteBanner
             Layout.fillWidth: true
-            Layout.minimumWidth: 360
+            Layout.minimumWidth: 300
             Layout.fillHeight: true
             onRefreshRequested: root.quoteRefreshRequested()
             onHelpRequested: function(message) { root.helpRequested(message) }

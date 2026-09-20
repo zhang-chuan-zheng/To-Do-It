@@ -9,8 +9,8 @@ QtObject {
     readonly property int windowResizeHandleWidth: 6
     readonly property int pageMargin: 12
     readonly property int panelPadding: 10
-    readonly property int titleBarHeight: 50
-    readonly property int infoBarHeight: 46
+    readonly property int titleBarHeight: 46
+    readonly property int infoBarHeight: 40
     readonly property int tableHeaderHeight: 46
     readonly property int eventRowHeight: 52
     readonly property int eventOuterPadding: 6

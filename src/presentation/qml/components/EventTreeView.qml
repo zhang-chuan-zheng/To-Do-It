@@ -35,9 +35,11 @@ ScrollView {
     property string dragHoverEventId: ""
     property string dragHoverMode: ""
     property string settlingEventId: ""
+    property string pendingDeleteEventId: ""
+    property string contextMenuEventId: ""
     property int totalSourceCount: 0
-    property int summaryMatchedCount: 0
-    property string summaryLabel: qsTr("已完成")
+    property int summaryPendingCount: 0
+    property int summaryCompletedCount: 0
     property var availableFilterOptions: [qsTr("未完成事项"), qsTr("全部事项")]
     property var availableStatusOptions: [qsTr("进行中"), qsTr("已完成"), qsTr("已取消")]
     readonly property int itemCount: eventModel ? eventModel.count : 0
@@ -48,7 +50,6 @@ ScrollView {
         - fixedWidth - Metrics.eventFieldGap * 6)
 
     signal addRequested()
-    signal deleteRequested(string eventId)
     signal helpRequested(string message)
     signal attachmentOpened(string eventTitle, int attachmentIndex, bool folder)
     signal releaseInputFocusRequested()
@@ -136,7 +137,8 @@ ScrollView {
     function scheduleDetailsCloseIfInactive(eventId) {
         if (eventId.length === 0 || activeDetailsEventId !== eventId)
             return
-        if (pinnedEventId === eventId || editingDetailsEventId === eventId)
+        if (pinnedEventId === eventId || editingDetailsEventId === eventId
+                || contextMenuEventId === eventId)
             return
         if (isEventCardHovered(eventId)) {
             hoveredDetailsEventId = eventId
@@ -166,7 +168,7 @@ ScrollView {
         const filterValues = [qsTr("未完成事项"), qsTr("全部事项")]
         const editValues = [qsTr("进行中"), qsTr("已完成"), qsTr("已取消")]
         let total = 0
-        let matched = 0
+        let pending = 0
         let completed = 0
 
         for (let index = 0; index < sourceModel.count; ++index) {
@@ -181,20 +183,13 @@ ScrollView {
                 editValues.push(status)
             if (status === qsTr("已完成"))
                 ++completed
-            if (statusFilter === qsTr("未完成事项") && status !== qsTr("已完成"))
-                ++matched
-            else if (statusFilter !== qsTr("全部事项") && status === statusFilter)
-                ++matched
+            else if (status !== qsTr("已取消"))
+                ++pending
         }
 
         totalSourceCount = total
-        if (statusFilter === qsTr("全部事项")) {
-            summaryLabel = qsTr("已完成")
-            summaryMatchedCount = completed
-        } else {
-            summaryLabel = statusFilter
-            summaryMatchedCount = matched
-        }
+        summaryPendingCount = pending
+        summaryCompletedCount = completed
         availableFilterOptions = filterValues
         availableStatusOptions = editValues
     }
@@ -518,6 +513,21 @@ ScrollView {
             return
         }
 
+        if (editingDetailsEventId.length > 0
+                && editingDetailsEventId !== eventId) {
+            if (hovered) {
+                hoveredDetailsEventId = eventId
+                pendingDetailsEventId = eventId
+                detailSwitchTimer.stop()
+            } else {
+                if (hoveredDetailsEventId === eventId)
+                    hoveredDetailsEventId = ""
+                if (pendingDetailsEventId === eventId)
+                    pendingDetailsEventId = ""
+            }
+            return
+        }
+
         if (detailsTransitionActive) {
             if (eventId === activeDetailsEventId) {
                 transitionTargetHovered = hovered
@@ -547,7 +557,9 @@ ScrollView {
             pendingDetailsEventId = ""
             detailSwitchTimer.stop()
         }
-        if (activeDetailsEventId === eventId && editingDetailsEventId !== eventId)
+        if (activeDetailsEventId === eventId
+                && editingDetailsEventId !== eventId
+                && contextMenuEventId !== eventId)
             detailCloseTimer.restart()
     }
 
@@ -555,8 +567,8 @@ ScrollView {
         if (eventId.length === 0 || dragInProgress)
             return
         if (editingDetailsEventId.length > 0 && editingDetailsEventId !== eventId) {
-            releaseInputFocusRequested()
-            editingDetailsEventId = ""
+            pendingDetailsEventId = eventId
+            return
         }
         pendingDetailsEventId = ""
         detailSwitchTimer.stop()
@@ -588,7 +600,8 @@ ScrollView {
                 && hoveredDetailsEventId === pendingDetailsEventId) {
             detailSwitchTimer.restart()
         } else if (activeDetailsEventId === eventId
-                   && hoveredDetailsEventId !== eventId) {
+                   && hoveredDetailsEventId !== eventId
+                   && contextMenuEventId !== eventId) {
             detailCloseTimer.restart()
         }
     }
@@ -663,6 +676,8 @@ ScrollView {
 
     function anyEventContentEditing() {
         if (attachmentSelectionActive)
+            return true
+        if (contextMenuEventId.length > 0 || deleteConfirmation.visible)
             return true
         for (let index = 0; index < eventRepeater.count; ++index) {
             const delegate = eventRepeater.itemAt(index)
@@ -885,9 +900,16 @@ ScrollView {
         return parsedDateTime(currentDateTimeText())
     }
 
-    function beginDraft() {
-        if (hasDraft)
+    function beginDraft(parentId) {
+        if (hasDraft) {
+            helpRequested(qsTr("请先完成当前正在新建的事项"))
             return
+        }
+        const targetParentId = String(parentId || "")
+        if (targetParentId.length > 0 && sourceIndexForId(targetParentId) < 0) {
+            helpRequested(qsTr("无法找到父事项，请刷新后重试"))
+            return
+        }
         const eventId = eventIdFactory ? String(eventIdFactory()) : ""
         if (eventId.length === 0) {
             helpRequested(qsTr("无法创建事项编号，请稍后重试"))
@@ -895,7 +917,7 @@ ScrollView {
         }
         sourceModel.append({
             "eventKey": eventId,
-            "parentId": "",
+            "parentId": targetParentId,
             "titleText": "",
             "importance": 3,
             "startAt": currentDateTimeText(),
@@ -904,11 +926,70 @@ ScrollView {
             "duration": "00 天 00 时 00 分",
             "note": "",
             "files": "",
-            "manualOrder": nextChildOrder(""),
+            "manualOrder": nextChildOrder(targetParentId),
             "isDraft": true
         })
         rebuildVisibleModel()
-        helpRequested(qsTr("请填写事项名称；重要程度默认为 5，开始时间默认为当前时间"))
+        helpRequested(targetParentId.length > 0
+            ? qsTr("请填写子事项名称；重要程度默认为 5，开始时间默认为当前时间")
+            : qsTr("请填写事项名称；重要程度默认为 5，开始时间默认为当前时间"))
+    }
+
+    function descendantCount(eventId) {
+        let count = 0
+        for (let index = 0; index < sourceModel.count; ++index) {
+            const candidateId = sourceModel.get(index).eventKey
+            if (candidateId !== eventId && isDescendant(candidateId, eventId))
+                ++count
+        }
+        return count
+    }
+
+    function requestDelete(eventId) {
+        const item = sourceItemForId(eventId)
+        if (!item)
+            return
+        releaseInputFocusRequested()
+        pendingDeleteEventId = eventId
+        deleteConfirmation.eventTitle = String(item.titleText).trim().length > 0
+            ? String(item.titleText) : qsTr("未命名事项")
+        deleteConfirmation.descendantCount = descendantCount(eventId)
+        deleteConfirmation.open()
+    }
+
+    function confirmPendingDelete() {
+        const eventId = pendingDeleteEventId
+        if (eventId.length === 0)
+            return
+
+        const deleteIds = ({})
+        let removedCount = 0
+        for (let index = 0; index < sourceModel.count; ++index) {
+            const candidateId = sourceModel.get(index).eventKey
+            if (isDescendant(candidateId, eventId)) {
+                deleteIds[candidateId] = true
+                ++removedCount
+            }
+        }
+        for (let index = sourceModel.count - 1; index >= 0; --index) {
+            const candidateId = sourceModel.get(index).eventKey
+            if (deleteIds[candidateId])
+                sourceModel.remove(index)
+        }
+        if (activeDetailsEventId.length > 0
+                && sourceIndexForId(activeDetailsEventId) < 0)
+            activeDetailsEventId = ""
+        if (editingDetailsEventId.length > 0
+                && sourceIndexForId(editingDetailsEventId) < 0)
+            editingDetailsEventId = ""
+        if (pinnedEventId.length > 0 && sourceIndexForId(pinnedEventId) < 0)
+            pinnedEventId = ""
+        pendingDeleteEventId = ""
+        rebuildVisibleModel()
+        schedulePersistence()
+        helpRequested(removedCount > 1
+            ? qsTr("事项及其 %1 个子孙事项已删除").arg(removedCount - 1)
+            : qsTr("事项已删除"))
     }
 
     function finishTitleEditing(eventId, pointerInside) {
@@ -917,13 +998,19 @@ ScrollView {
             editingDetailsEventId = ""
         if (pointerInside)
             return
-        pendingDetailsEventId = ""
-        hoveredDetailsEventId = ""
         deferredHoverEventId = ""
-        detailSwitchTimer.stop()
         detailCloseTimer.stop()
         if (activeDetailsEventId === eventId)
             activeDetailsEventId = ""
+        if (pendingDetailsEventId.length > 0
+                && hoveredDetailsEventId === pendingDetailsEventId
+                && isEventCardHovered(pendingDetailsEventId)) {
+            detailSwitchTimer.restart()
+            return
+        }
+        pendingDetailsEventId = ""
+        hoveredDetailsEventId = ""
+        detailSwitchTimer.stop()
     }
 
     function abandonDraft(eventId) {
@@ -1123,6 +1210,16 @@ ScrollView {
 
     ListModel { id: visibleModel }
 
+    EventDeleteConfirmation {
+        id: deleteConfirmation
+        parent: root
+        onDeletionConfirmed: root.confirmPendingDelete()
+        onClosed: {
+            if (!visible)
+                root.pendingDeleteEventId = ""
+        }
+    }
+
     Timer {
         id: persistenceTimer
         interval: 5 * 60 * 1000
@@ -1221,6 +1318,7 @@ ScrollView {
             if (root.activeDetailsEventId.length > 0
                     && root.pinnedEventId !== root.activeDetailsEventId
                     && root.editingDetailsEventId !== root.activeDetailsEventId
+                    && root.contextMenuEventId !== root.activeDetailsEventId
                     && !root.isEventCardHovered(root.activeDetailsEventId)) {
                 root.hoveredDetailsEventId = ""
                 root.pendingDetailsEventId = ""
@@ -1301,7 +1399,19 @@ ScrollView {
                     indentOffset: hierarchyIndent
                     importanceGlobalX: Metrics.eventOuterPadding + Metrics.sequenceColumnWidth
                         + Metrics.eventFieldGap + root.titleColumnWidth + Metrics.eventFieldGap
-                    onDeleteRequested: root.deleteRequested(eventKey)
+                    onDeleteRequested: root.requestDelete(eventKey)
+                    onCreateChildRequested: root.beginDraft(eventKey)
+                    onContextMenuStateChanged: function(active) {
+                        if (active) {
+                            root.contextMenuEventId = eventKey
+                            if (root.activeDetailsEventId === eventKey)
+                                detailCloseTimer.stop()
+                            return
+                        }
+                        if (root.contextMenuEventId === eventKey)
+                            root.contextMenuEventId = ""
+                        root.scheduleDetailsCloseIfInactive(eventKey)
+                    }
                     onFieldEdited: function(field, value) { root.updateEventField(eventKey, field, value) }
                     onMoveRequested: function(draggedId, targetId, mode) {
                         root.moveEvent(draggedId, targetId, mode)

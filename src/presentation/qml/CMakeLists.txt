@@ -12,6 +12,8 @@ set(todoit_qml_files
     "${todoit_qml_root}/components/DonationPopup.qml"
     "${todoit_qml_root}/components/EditableStatusComboBox.qml"
     "${todoit_qml_root}/components/EventCard.qml"
+    "${todoit_qml_root}/components/EventContextMenu.qml"
+    "${todoit_qml_root}/components/EventDeleteConfirmation.qml"
     "${todoit_qml_root}/components/EventTableHeader.qml"
     "${todoit_qml_root}/components/EventTreeView.qml"
     "${todoit_qml_root}/components/ExpandableSearchBox.qml"
