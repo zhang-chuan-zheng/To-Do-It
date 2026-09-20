@@ -12,14 +12,14 @@
   <ForcedInstallation>true</ForcedInstallation>
   <Essential>true</Essential>
   <Script>installscript.qs</Script>
-  <UpdateFile CompressedSize="47757561" OS="Any" UncompressedSize="131544806"/>
+  <UpdateFile CompressedSize="47772293" OS="Any" UncompressedSize="131619007"/>
   <DownloadableArchives>assets.7z,defaults.7z,licenses.7z,plugins.7z,qml.7z,translations.7z,content.7z</DownloadableArchives>
   <UserInterfaces>welcomewidget.ui,uninstalloptionswidget.ui</UserInterfaces>
   <Licenses>
    <License file="LGPL-3.0-only.txt" name="GNU Lesser General Public License v3"/>
   </Licenses>
-  <SHA1>fa542bb931e2191a9e601a46af8f857e1c4760ce</SHA1>
+  <SHA1>2ab2cbd2d30d42530b0e9cb82dd82b5c1e1bc348</SHA1>
  </PackageUpdate>
- <SHA1>8a7f52c1cd88875f11a69c6d52bb448f21094df5</SHA1>
- <MetadataName>2026-09-20-0324_meta.7z</MetadataName>
+ <SHA1>708b65c8d60b9f13a9dc1877563aa72aa21379f9</SHA1>
+ <MetadataName>2026-09-20-1614_meta.7z</MetadataName>
 </Updates>
